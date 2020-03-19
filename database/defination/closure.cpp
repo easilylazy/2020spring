@@ -2,23 +2,17 @@
 form::form()
 {
 	int num = 1;
-	attributesNum = num;
-	dependenciesNum = 0;
-	
-	//attributes = new int(num);
-	initAttributes(num);
+
+	setNum(num);
 }
 form::form(int num)
 {
-	attributesNum = num;
-	dependenciesNum = 0;
-
-	initAttributes(num);
+	setNum(num);
 }
 
 void form::setAttributes()
 {
-	int num=0;
+	int num = 0;
 
 	cout << "How many attributes in total(1-10)?" << endl;
 	cin >> num;
@@ -30,19 +24,62 @@ void form::setAttributes()
 	}
 
 	setNum(num);
-	
+
 }
 void form::setNum(int num)
 {
 	attributesNum = num;
 	dependenciesNum = 0;
-	initAttributes(num);
+	initAttributes();
+	initClosure();
+	initbasisDependencies();
+	initControlDependencies();
+}
+void form::setDependenciesNum(int num)
+{
+	dependenciesNum = num;
+}
+//改变依赖的值设定，site为'l'选择改变左边的被依赖项，'r'改变右边依赖项; i,j表示改变第i项的第j个属性值为value（0/1）
+void form::setDependency(char site, int i, int j, int value = 1)
+{
+	if (site == 'l')
+	{
+		leftDependencies[i][j] = value;
+	}
+	if (site == 'r')
+	{
+		rightDependencies[i][j] = value;
+	}
+
+}
+
+//传入数组直接改变依赖值，若state为-1，新增依赖项，否则改变第state项
+void form::setDependencies(int* leftDependency, int* rightDependency, int state)
+{
+	if (state == -1)
+	{
+		for (int i = 0; i < attributesNum; i++)
+		{
+			leftDependencies[dependenciesNum][i] = leftDependency[i];
+			rightDependencies[dependenciesNum][i] = rightDependency[i];
+		}
+		dependenciesNum++;
+
+	}
+	else
+	{
+		for (int i = 0; i < attributesNum; i++)
+		{
+			leftDependencies[state][i] = leftDependency[i];
+			rightDependencies[state][i] = rightDependency[i];
+		}
+	}
 }
 
 
-bool form::isValid(char &ch)
+bool form::isValid(char& ch)
 {
-		//输入字母
+	//输入字母
 	int ctoc = ch - 65;
 	if (ctoc >= 0 && ctoc < attributesNum)
 	{
@@ -50,7 +87,7 @@ bool form::isValid(char &ch)
 		return true;
 	}
 
-		//输入数组索引值
+	//输入数组索引值
 	int ctoi = ch - 48;
 	if (ctoi >= 0 && ctoi < attributesNum)
 	{
@@ -63,20 +100,20 @@ bool form::isValid(char &ch)
 		print();
 		return false;
 	}
-		
+
 }
 
-void form::initAttributes(int num)
+void form::initAttributes()
 {
 
-	for (int i = 0; i < num; i++)
+	for (int i = 0; i < attributesNum; i++)
 	{
 		attributes[i] = 1;
 	}
 }
 
 
-void form::initClosure(int num)
+void form::initClosure()
 {
 	for (int i = 0; i < attributesNum; i++)
 	{
@@ -88,11 +125,25 @@ void form::initDependencies(int index)
 {
 	for (int i = 0; i < attributesNum; i++)
 	{
-		leftDetermine[index][i] = 0;
-		rightDetermine[index][i] = 0;
+		leftDependencies[index][i] = 0;
+		rightDependencies[index][i] = 0;
 	}
 }
-void form::printAttributes(int* attributes,char choice)
+void form::initbasisDependencies()
+{
+	for (int i = 0; i < dependenciesNum; i++)
+	{
+		basisDependencies[i] = 1;//初始都包括
+	}
+}
+void form::initControlDependencies()
+{
+	for (int i = 0; i < dependenciesNum; i++)
+	{
+		basisDependencies[i] = 1;//初始都包括
+	}
+}
+void form::printAttributes(int* attributes, char choice)
 {
 	for (int i = 0; i < MAXSIZE; i++)
 	{
@@ -114,17 +165,17 @@ void form::print()
 
 	for (int i = 0; i < attributesNum; i++)
 	{
-		cout << i << ": " << char(i+65)<<endl;
+		cout << i << ": " << char(i + 65) << endl;
 	}
 	cout << "determination have " << dependenciesNum << " sets" << endl;
 
 	for (int i = 0; i < dependenciesNum; i++)
 	{
-//if (leftDetermine[i][j] == 1)
-			printAttributes(leftDetermine[i], 's');
-			cout << "->";
-			printAttributes(rightDetermine[i], 's');
-			cout << endl;
+		//if (leftDependencies[i][j] == 1)
+		printAttributes(leftDependencies[i], 's');
+		cout << "->";
+		printAttributes(rightDependencies[i], 's');
+		cout << endl;
 
 	}
 
@@ -132,14 +183,29 @@ void form::print()
 	for (int i = 0; i < attributesNum; i++)
 	{
 
-		if(closure[i]==1)
+		if (closure[i] == 1)
 			cout << i << ": " << char(i + 65) << endl;
 	}
 
+	printBasis();
 	/*for (int i = 0; i < sizeof(attributes); i++)
 	{
 		cout << attributes[i] << endl;
 	}*/
+}
+void form::printBasis()
+{
+	cout << "basis: " << endl;
+	for (int i = 0; i < dependenciesNum; i++)
+	{
+		if (basisDependencies[i] == 1)
+		{
+			printAttributes(leftDependencies[i], 's');
+			cout << "->";
+			printAttributes(rightDependencies[i], 's');
+			cout << endl;
+		}
+	}
 }
 void form::printAttribute(int index)
 {
@@ -171,11 +237,11 @@ void form::addDependency()
 {
 	initDependencies(dependenciesNum);
 	char choice;
-	
+
 
 	cout << "enter attributes determine others" << tips << endl;
 
-	int leftNum = addSide(choice, leftDetermine[dependenciesNum]);
+	int leftNum = addSide(choice, leftDependencies[dependenciesNum]);
 
 	if (choice == 's' && leftNum > 0)
 	{
@@ -184,12 +250,12 @@ void form::addDependency()
 		{
 			cout << "you add " << leftNum << " attributes" << endl;
 			cout << "what you have typed is/are: " << endl;
-			printAttributes(leftDetermine[dependenciesNum]);
-		}	
+			printAttributes(leftDependencies[dependenciesNum]);
+		}
 
-		cout << "enter attributes determined by above" << tips << endl;
+		cout << "enter attributes depending on above" << tips << endl;
 
-		int rightNum = addSide(choice, rightDetermine[dependenciesNum]);
+		int rightNum = addSide(choice, rightDependencies[dependenciesNum]);
 
 		if (choice == 's' && rightNum > 0)
 		{
@@ -197,9 +263,9 @@ void form::addDependency()
 			{
 				cout << "you add " << rightNum << " attributes" << endl;
 				cout << "what you have typed is/are: " << endl;
-				printAttributes(rightDetermine[dependenciesNum]);
-			}		
-			
+				printAttributes(rightDependencies[dependenciesNum]);
+			}
+
 
 			if (rightNum > 1)
 			{
@@ -216,25 +282,25 @@ void form::addDependency()
 	}
 
 	cout << "the total is: " << endl;
-	printAttributes(leftDetermine[dependenciesNum], 's');
+	printAttributes(leftDependencies[dependenciesNum], 's');
 	cout << "->";
-	printAttributes(rightDetermine[dependenciesNum], 's');
+	printAttributes(rightDependencies[dependenciesNum], 's');
 	cout << "\nDo you want to save" << tips << endl;
 	cin >> choice;
 	if (choice == 's')
 	{
-		//this->leftDetermine
+		//this->leftDependencies
 		dependenciesNum++;
 	}
 
 }
 
-void form::	setClosure()
+void form::setClosure()
 {
 	char choice;
 	cout << "enter an attribut set" << tips << endl;
 
-	initClosure(attributesNum);
+	initClosure();
 
 	int initNum = addSide(choice, closure);
 
@@ -254,18 +320,18 @@ void form::findClosure()
 		isConsistent = true;
 		for (int j = 0; j < attributesNum; j++)
 		{
-			if (leftDetermine[i][j] == 1 && closure[j] != 1)
+			if (leftDependencies[i][j] == 1 && closure[j] != 1)
 			{
 				isConsistent = false;
 				break;
 			}
-			
+
 		}
 		if (isConsistent == true)
 		{
 			for (int j = 0; j < attributesNum; j++)
 			{
-				if (rightDetermine[i][j] == 1 && closure[j] != 1)
+				if (rightDependencies[i][j] == 1 && closure[j] != 1)
 				{
 					cout << "add ";
 					printAttribute(j);
@@ -275,7 +341,166 @@ void form::findClosure()
 				}
 			}
 		}
-		
 	}
 	return;
 }
+
+
+void form::findClosure(int index)
+{
+	bool isConsistent = true;
+	for (int i = 0; i < dependenciesNum; i++)
+	{
+		//若将某依赖除去，则跳过
+		if (basisDependencies[i] != 1)
+		{
+			continue;
+		}
+
+
+		isConsistent = true;
+		for (int j = 0; j < attributesNum; j++)
+		{
+			if (leftDependencies[i][j] == 1 && closure[j] != 1)
+			{
+				isConsistent = false;
+				break;
+			}
+
+		}
+		if (isConsistent == true)
+		{
+			for (int j = 0; j < attributesNum; j++)
+			{
+				if (rightDependencies[i][j] == 1 && closure[j] != 1)
+				{
+					//不打印过程
+					/*cout << "add ";
+					printAttribute(j);
+					cout << endl;*/
+					closure[j] = 1;
+					findClosure(index);
+				}
+			}
+		}
+	}
+	return;
+}
+void form::sendToClosure(int index)
+{
+	initClosure();
+
+	for (int j = 0; j < attributesNum; j++)
+	{
+		if (leftDependencies[index][j] == 1)
+		{
+			closure[j] = 1;
+		}
+	}
+	/*for (int i = 0; i < dependenciesNum; i++)
+	{
+		for (int j = 0; j < attributesNum; j++)
+		{
+			if (i != index)
+			{
+				if (leftDependencies[i][j] == 1)
+				{
+					closure[j] = 1;
+				}
+			}
+		}
+	}*/
+}
+void form::findBasis()
+{
+
+
+	//依次删除一个依赖X'->Y'，寻找新依赖集中能否推出Y'
+	//若能，则可被删除；否则不能被删除
+
+	//需要函数：获取一个依赖集所有左边attributes
+
+	//closure   输出结果是否含有Y'
+	bool basisFound = false;
+	initbasisDependencies();
+
+	for (int i = 0; i < dependenciesNum; i++)
+	{
+		int targetValue = 0;
+
+		//必须在可以除去的依赖中
+
+		if (controlDependencies[i] == -1)
+		{
+			continue;
+		}
+		//假设除去该依赖，检查结果
+		basisDependencies[i] = 0;
+		for (int j = 0; j < attributesNum; j++)
+		{
+			if (rightDependencies[i][j] == 1)
+			{
+				targetValue = j;//目标值
+			}
+		}
+
+		sendToClosure(i);//将除删除的依赖的左边的X'传给closure
+		findClosure(targetValue);//将目标值传入
+
+		//得到的闭包中不含Y'
+		if (closure[targetValue] != 1) {
+			basisDependencies[i] = 1;//该依赖不可除去
+		}
+		else {
+			basisFound = true;
+		}
+	}
+
+	if (basisFound == true)
+	{
+		printBasis();
+	}
+	//若仍有可改变的值，递归获取新的可能，否则return
+	if (changeControl() == true)
+	{
+		findBasis();
+	}
+	else
+	{
+		return;
+	}
+}
+bool form::changeControl()
+{
+	int last0Site = -1;
+
+	//寻找除取末位 最后一个0出现的位置
+	//若末位的0已是最后的属性，则寻找上一位0，如果上一个0不存在，则退出程序，返回false
+	for (int i = 0; i < attributesNum - 1; i++)
+	{
+		if (i > last0Site && basisDependencies[i] == 0)
+		{
+			last0Site = i;
+		}
+	}
+
+	if (last0Site == -1)
+	{
+		return false;
+	}
+
+	//将末位的0置为-1
+	controlDependencies[last0Site] = -1;
+
+	//将置-1后的的控制变量为-1的项置1（全部置1），保留前面的值
+	for (int i = 0; i < attributesNum; i++)
+	{
+		if (i > last0Site)
+		{
+			controlDependencies[i] = 1;
+		}
+	}
+
+	return true;
+}
+
