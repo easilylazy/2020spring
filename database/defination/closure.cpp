@@ -30,6 +30,7 @@ void form::setNum(int num)
 {
 	attributesNum = num;
 	dependenciesNum = 0;
+	ownIsBasis = true;
 	initAttributes();
 	initClosure();
 	initbasisDependencies();
@@ -76,6 +77,17 @@ void form::setDependencies(int* leftDependency, int* rightDependency, int state)
 	}
 }
 
+int form::getRightDependency(int index)
+{
+	for (int j = 0; j < attributesNum; j++)
+	{
+		if (rightDependencies[index][j] == 1)
+		{
+			return j;//目标值
+		}
+	}
+	return -1;
+}
 
 bool form::isValid(char& ch)
 {
@@ -140,7 +152,17 @@ void form::initControlDependencies()
 {
 	for (int i = 0; i < dependenciesNum; i++)
 	{
-		basisDependencies[i] = 1;//初始都包括
+		controlDependencies[i] = 1;//初始都包括
+	}
+}
+void form::initMaskAttributes()
+{
+	for (int i = 0; i < dependenciesNum; i++)
+	{
+		for (int j = 0; j < attributesNum; j++)
+		{
+			maskAttributes[i][j] = 0;
+		}
 	}
 }
 void form::printAttributes(int* attributes, char choice)
@@ -200,7 +222,14 @@ void form::printBasis()
 	{
 		if (basisDependencies[i] == 1)
 		{
-			printAttributes(leftDependencies[i], 's');
+			//printAttributes(leftDependencies[i], 's');
+			for (int j = 0; j < attributesNum; j++)
+			{
+				if (maskAttributes[i][j] != -1 && leftDependencies[i][j] == 1)
+				{
+					cout << char(j + 65);
+				}
+			}
 			cout << "->";
 			printAttributes(rightDependencies[i], 's');
 			cout << endl;
@@ -397,24 +426,28 @@ void form::sendToClosure(int index)
 			closure[j] = 1;
 		}
 	}
-	/*for (int i = 0; i < dependenciesNum; i++)
-	{
-		for (int j = 0; j < attributesNum; j++)
-		{
-			if (i != index)
-			{
-				if (leftDependencies[i][j] == 1)
-				{
-					closure[j] = 1;
-				}
-			}
-		}
-	}*/
 }
+//除了某删去第index依赖的第mask属性,将其他的属性传入closure，再便于之后计算闭包能否覆盖删除属性
+void form::sendToClosure(int index, int mask)
+{
+	initClosure();
+
+
+
+	for (int j = 0; j < attributesNum; j++)
+	{
+
+		if (j != mask && leftDependencies[index][j] == 1)
+		{
+			closure[j] = 1;
+		}
+	}
+
+}
+//递归函数，调用之前必须初始化controlDependencies
+//initControlDependencies();
 void form::findBasis()
 {
-
-
 	//依次删除一个依赖X'->Y'，寻找新依赖集中能否推出Y'
 	//若能，则可被删除；否则不能被删除
 
@@ -430,34 +463,42 @@ void form::findBasis()
 
 		//必须在可以除去的依赖中
 
-		if (controlDependencies[i] == -1)
+		if (controlDependencies[i] != 1)
 		{
 			continue;
 		}
 		//假设除去该依赖，检查结果
 		basisDependencies[i] = 0;
-		for (int j = 0; j < attributesNum; j++)
-		{
-			if (rightDependencies[i][j] == 1)
-			{
-				targetValue = j;//目标值
-			}
-		}
+
+		targetValue = getRightDependency(i);
+
 
 		sendToClosure(i);//将除删除的依赖的左边的X'传给closure
-		findClosure(targetValue);//将目标值传入
+		findClosure(targetValue);//将目标值传入（meaningless）
 
 		//得到的闭包中不含Y'
-		if (closure[targetValue] != 1) {
+		if (closure[targetValue] != 1)
+		{
 			basisDependencies[i] = 1;//该依赖不可除去
 		}
-		else {
+		else
+		{
 			basisFound = true;
 		}
 	}
 
 	if (basisFound == true)
 	{
+		//一旦找到一个，自身不再是最小的
+		ownIsBasis = false;
+		cout << "\r";
+		initMaskAttributes();
+		cout << "after step 1:" << endl;
+		printBasis();
+		//进一步对左边的属性进行处理
+
+		secondProcess();
+		cout << "after step 2:" << endl;
 		printBasis();
 	}
 	//若仍有可改变的值，递归获取新的可能，否则return
@@ -467,6 +508,17 @@ void form::findBasis()
 	}
 	else
 	{
+		if (ownIsBasis == true)
+		{
+			initMaskAttributes();
+			cout << "after step 1:" << endl;
+			printBasis();
+			//进一步对左边的属性进行处理
+			secondProcess();
+			cout << "after step 2:" << endl;
+			printBasis();
+
+		}
 		return;
 	}
 }
@@ -492,15 +544,109 @@ bool form::changeControl()
 	//将末位的0置为-1
 	controlDependencies[last0Site] = -1;
 
-	//将置-1后的的控制变量为-1的项置1（全部置1），保留前面的值
+	//将置-1后的的控制变量为-1的项置1，保留前面的值
 	for (int i = 0; i < attributesNum; i++)
 	{
-		if (i > last0Site)
+		if (i > last0Site && controlDependencies[i] == -1)
 		{
 			controlDependencies[i] = 1;
 		}
 	}
 
 	return true;
+}
+
+// 计算除第index依赖以外剩下的依赖的闭包
+void form::findClosure(char choice, int index)
+{
+	bool isConsistent = true;
+	for (int i = 0; i < dependenciesNum; i++)
+	{
+		if (choice == 's')
+		{
+			//将该依赖删去
+			if (index == i)
+			{
+				continue;
+			}
+		}
+		//若将某依赖除去，则跳过
+		if (basisDependencies[i] != 1)
+		{
+			continue;
+		}
+
+
+		isConsistent = true;
+		for (int j = 0; j < attributesNum; j++)
+		{
+			if (leftDependencies[i][j] == 1 && closure[j] != 1)
+			{
+				isConsistent = false;
+				break;
+			}
+
+		}
+		if (isConsistent == true)
+		{
+			for (int j = 0; j < attributesNum; j++)
+			{
+				if (rightDependencies[i][j] == 1 && closure[j] != 1)
+				{
+					//不打印过程
+					/*cout << "add ";
+					printAttribute(j);
+					cout << endl;*/
+					closure[j] = 1;
+					findClosure(choice, index);
+				}
+			}
+		}
+	}
+	return;
+}
+//需要在被调用前初始化maskAttributes
+void form::secondProcess()
+{
+	// 依次取上一步完成找到的basisDependency的左端的属性
+	// 若删去一个属性后
+		// 通过maskAttributes[][]实现
+		// 若maskAttributes[i][j] = -1（可被删去）
+
+		// 则该属性被删去（不被计算闭包时考虑）
+		// 若maskAttributes[i][j] = 1（不可被删去，被处理后证明）
+		// 若maskAttributes[i][j] = 0（初始值）
+
+	// 能通过除该依赖以外剩下的依赖得到这个属性，则可删去
+
+	for (int i = 0; i < dependenciesNum; i++)
+	{
+		if (basisDependencies[i] == 1)
+		{
+			for (int j = 0; j < attributesNum; j++)
+			{
+				//确保该属性尚未被本次处理过程处理
+				if (maskAttributes[i][j] != -1 && leftDependencies[i][j] == 1)
+				{
+
+					//closure 要被设定为除本依赖外的其他依赖
+					sendToClosure(i, j);
+					//进行处理
+					findClosure('s', i);
+
+					//判断是否得到删去的j属性
+					if (closure[j] == 1)
+					{
+						maskAttributes[i][j] = -1; //能找到，可被删去
+					}
+					else
+					{
+						maskAttributes[i][j] = 1; //能找到，不可被删去
+					}
+				}
+			}
+		}
+	}
+
 }
 
