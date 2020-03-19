@@ -1,0 +1,53 @@
+
+//typedef struct interface;
+//typedef int age;
+//age myage = 4;
+
+AdiministrationDivision(code, name, population, size)
+Tourist(ID, name, gender, birthdate;)
+
+interface AdministrativeDivision
+	key(code)
+{
+
+	
+	attribute string code;
+
+	attribute string name;
+	attribute string population;
+	attribute string size;
+	
+
+	
+
+	relationship set<Tourist> inChargeOf
+		inverse Tourist::comesFrom;
+	relationship set<Destination> haveJuristictionOf
+		inverse Destination::belongsTo;
+}
+interface Tourist
+	key(ID)
+{
+	attribute string ID;
+	attribute string name;
+	attribute string gender;
+	attribute string birthdate;
+
+	relationship AdministrativeDivision comesFrom
+		inverse AdministrativeDivision::inChargeOf;
+
+}
+interface Destination
+	key(name)
+{
+	attribute string name;
+	attribute string type;
+	attribute string level;
+	attribute Set<string> content;
+
+	relationship AdministrativeDivision belongsTo
+		inverse AdminstrativeDivison::haveJuristictonOver;
+
+				
+}
+
