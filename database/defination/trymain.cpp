@@ -2,7 +2,7 @@
 #include "closure.h"
 
 //PPT上例子
-void defaultSetting(form& de)
+void defaultSetting(form& sets)
 {
 	int attributesNum = 3;//A,B,C
 	int dependenciesNum = 6;
@@ -17,14 +17,14 @@ void defaultSetting(form& de)
 		{1,0,0},{0,0,1},	//B->A, B->C,
 		{1,0,0},{0,1,0}		//C->A, C->B
 	};
-	de.setNum(3);
+	sets.setNum(3);
 	for (int i = 0; i < dependenciesNum; i++)
 	{
-		de.setDependencies(leftDependencies[i], rightDependencies[i]);
+		sets.setDependencies(leftDependencies[i], rightDependencies[i]);
 	}
 }
 //博客中例子https://blog.csdn.net/Game_Zmh/article/details/88061628
-void defaultSetting2(form& de)
+void defaultSetting2(form& sets)
 {
 	int attributesNum = 5;//A,B,C,D,E
 	int dependenciesNum = 5;
@@ -39,16 +39,16 @@ void defaultSetting2(form& de)
 		{0,0,1,0,0},{0,0,0,0,1}	,    //ABD->C,ABD->E
 		{0,0,0,1,0}		//E->D
 	};
-	de.setNum(attributesNum);
+	sets.setNum(attributesNum);
 	for (int i = 0; i < dependenciesNum; i++)
 	{
-		de.setDependencies(leftDependencies[i], rightDependencies[i]);
+		sets.setDependencies(leftDependencies[i], rightDependencies[i]);
 	}
 
 
 }
 //博客中例子https://www.cnblogs.com/wangyige/p/6786047.html
-void defaultSetting3(form& de)
+void defaultSetting3(form& sets)
 {
 	int attributesNum = 10;//A,B,C,D,E,F,G,H
 	int dependenciesNum = 6;
@@ -71,10 +71,10 @@ void defaultSetting3(form& de)
 		{0,0,0,0,0,0,0,1,0,0}    //G->H
 
 	};
-	de.setNum(attributesNum);
+	sets.setNum(attributesNum);
 	for (int i = 0; i < dependenciesNum; i++)
 	{
-		de.setDependencies(leftDependencies[i], rightDependencies[i]);
+		sets.setDependencies(leftDependencies[i], rightDependencies[i]);
 	}
 
 
@@ -83,10 +83,12 @@ void defaultSetting3(form& de)
 
 int main(void)
 {
-	form te;
+	//实例对象
+	form sets;
 
 	//设置为默认情况
-	defaultSetting3(te);
+	defaultSetting3(sets);
+
 
 	string menu = "********************MENU********************\n"\
 		"i.initAttributes\ta.addDependency\ts.setClosure\nf.findClosure\t"\
@@ -94,6 +96,7 @@ int main(void)
 		"********************************************\n";
 	char choice;
 
+	//打印菜单，读取输入
 	cout << menu;
 	cin >> choice;
 
@@ -102,23 +105,23 @@ int main(void)
 		switch (choice)
 		{
 		case'i':
-			te.setAttributes();
+			sets.setAttributes();
 			break;
 		case'a':
-			te.addDependency();
+			sets.addDependency();
 			break;
 		case's':
-			te.setClosure();
+			sets.setClosure();
 			break;
 		case'f':
-			te.findClosure();
+			sets.findClosure();
 			break;
 		case'p':
-			te.print();
+			sets.printInfo();
 			break;
 		case'b':
-			te.initControlDependencies();
-			te.findBasis();
+			sets.initControlDependencies();
+			sets.findBasis();
 			break;
 		default:
 			break;

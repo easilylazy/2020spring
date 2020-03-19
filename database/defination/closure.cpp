@@ -109,7 +109,7 @@ bool form::isValid(char& ch)
 	else
 	{
 		cout << ch << " is invalid" << endl;
-		print();
+		printInfo();
 		return false;
 	}
 
@@ -180,7 +180,7 @@ void form::printAttributes(int* attributes, char choice)
 		}
 	}
 }
-void form::print()
+void form::printInfo()
 {
 	//sizeof(attributes)/ sizeof(int) 
 	cout << "the sets has " << attributesNum << " attributes" << endl;
@@ -556,7 +556,7 @@ bool form::changeControl()
 	return true;
 }
 
-// 计算除第index依赖以外剩下的依赖的闭包
+
 void form::findClosure(char choice, int index)
 {
 	bool isConsistent = true;
