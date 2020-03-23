@@ -11,19 +11,6 @@
 
 
 using namespace std;
-//class storageArray
-//{
-//private:
-//	int type; // 1为1维，2为2维
-//	int 
-//
-//public:
-//	storageArray(int& array)
-//	{
-//
-//	}
-//
-//};
 
 //英文
 extern string language;
@@ -33,6 +20,7 @@ void initArray(int* array,int length,int initValue = 0);
 void printArray(int* array, int length);
 void initArray2d(int* array, int M, int N, int initValue = 0);
 void printArray(int* array, int M, int N);
+bool compareArray(int* firstArray, int* secondArray, int length);
 class minimalBase
 {
 private:
@@ -63,29 +51,29 @@ public:
 
 #pragma region 设定
 	//设定属性值总数
-	void setAttributesNum(int num)
+	inline void setAttributesNum(int num)
 	{
 		attributesNum = num;
 	}
 	//设定依赖集总数
-	void setDependenciesNum(int num)
+	inline void setDependenciesNum(int num)
 	{
 		dependenciesNum = num;
 	}
 	//设定依赖集内容
-	void setLeftDependency(int i, int j)
+	inline void setLeftDependency(int i, int j)
 	{
 		leftDependencies[i][j] = 1;
 	}
 	//设定依赖集内容
-	void setRightDependency(int index, int value)
+	inline void setRightDependency(int index, int value)
 	{
 		rightDependencies[index] = value;
 	}
 #pragma endregion
 
 #pragma region 取值
-	int getDependenciesNum()
+	inline int getDependenciesNum()
 	{
 		return dependenciesNum;
 	}
@@ -250,7 +238,7 @@ private:
 public:
 	//提示语
 	string tips = "(q to quit and s to save): ";
-	string tipsCN = "(输入 q 退出，输入 s 保存): ";
+	string tipsCN = "(输入 s 保存/输入 q 不保存退出): ";
 
 	//构造函数，默认
 	form();
@@ -321,93 +309,13 @@ public:
 #pragma endregion
 
 	//只打印和前面不完全相同的依赖集
-	void printFinalResult()
-	{
-		int ct=0;
-		bool findIdentityBase;
-#pragma region tips
-		if (language == "EN")
-		{
-			cout << "***************FINAL RESULT*****************" << endl;
-		}
-		if (language == "CN")
-		{
-			cout << "***************最终结果*****************" << endl;
-
-		}
-#pragma endregion
-
-		
-		minimalBase current, exist;
-		for (int i = 0; i < minimalBasesNum; i++)
-		{
-			current.isValid = false;
-			current = minimalBases[i];
-			findIdentityBase = false;
-			for (int j = 0; j < i; j++)
-			{			
-				exist = minimalBases[j];
-				if (exist.isValid == true)
-				{
-
-					//比较是否新增的依赖集中成员都能在已有的某一个依赖集中找到
-					if (compare(current, exist) == true)
-					{
-						findIdentityBase = true;
-					}
-				}				
-			}
-			if (findIdentityBase != true)
-			{
-				ct++;
-				cout << "***************" << ct << "*****************" << endl;
-				current.isValid = true;
-				current.printDependencies();
-			}
-		}
-	}
+	void printFinalResult();
 	//比较两个数组中，完全一样返回true，否则返回false
-	bool compare(int* firstArray, int* secondArray, int length)
-	{
-		for (int i = 0; i < length; i++)
-		{
-			if (firstArray[i] != secondArray[i])
-			{
-				return false;
-			}
-		}
+	friend bool compareArray(int* firstArray, int* secondArray, int length);
 
-		return true;
-	}
 	//比较两个数组中，如果current中的所有内容被exist包含，完全一样返回true，否则返回false
-	bool compare(minimalBase current, minimalBase exist)
-	{
+	bool compare(minimalBase current, minimalBase exist);
 
-		bool findIdentityDependency;
-		for (int i = 0; i < current.getDependenciesNum(); i++)
-		{			
-			if (current.isNumValid(i))
-			{
-				findIdentityDependency = false;
-
-				for (int j = 0; j < exist.getDependenciesNum(); j++)
-				{
-					if (exist.rightDependencies[j] == current.rightDependencies[i]
-						&& (compare(exist.leftDependencies[j], current.leftDependencies[i], current.attributesNum)))
-					{
-						findIdentityDependency = true;
-					}
-				}
-
-				if (findIdentityDependency == false)
-				{
-					return false;
-				}
-			}
-			
-		}
-		return true;
-	}
 #pragma region 打印信息
 	//打印基本信息（全部）
 	void printInfo();

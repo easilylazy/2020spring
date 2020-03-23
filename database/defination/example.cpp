@@ -5,8 +5,8 @@ void chooseDefault(form& sets)
 
 	int chooseExample = 0;
 
-	string exampleTip = "Which example do you want to test? (range: 0-2)";
-	string exampleTipCN = "你想测试哪个例子? (范围: 0-2)";
+	string exampleTip = "Which example do you want to test? (range: 0-3)";
+	string exampleTipCN = "你想测试哪个例子? (范围: 0-3)";
 
 	if (language == "EN")
 	{
@@ -24,16 +24,21 @@ void chooseDefault(form& sets)
 		defaultSetting(sets);
 		break;
 	case 1:
-		defaultSetting2(sets);
+		defaultSetting1(sets);
 		break;
 	case  2:
+		defaultSetting2(sets);
+		break;
+	case  3:
 		defaultSetting3(sets);
 		break;
 	default:
-		cout << "0 or 1 or 2" << endl;
+		cout << "0 or 1 or 2 or 3" << endl;
 		break;
 	}
 }
+
+
 
 //PPT上例子
 void defaultSetting(form& sets)
@@ -42,15 +47,36 @@ void defaultSetting(form& sets)
 	string tip;
 	if (language == "EN")
 	{
-		tip = "this example was taken from PPT";
+		tip = "this example was DIY";
 	}
 	if (language == "CN")
 	{
-		tip = "本例来源：PPT";
+		tip = "本例来源：自设";
 	}
 	cout << tip << endl;
 #pragma endregion
 
+	int attributesNum = 4;//A,B,C,D
+	int dependenciesNum = 6;
+	int leftDependencies[6][4] = {
+		{1,0,0,0},{1,0,0,0},    //A
+		//{1,1,0},{1,1,0},    //AB
+		{0,1,0,0},{0,1,0,0},	//B
+		{0,0,1,1},{0,0,1,1}		//CD
+	};
+	int rightDependencies[6][4] = {
+		{0,1,0,0},{0,0,1,0},    //A->B, A->C,		
+		{1,0,0,0},{0,0,1,0},	//B->A, B->C,
+		{1,0,0,0},{0,1,0,0}		//CD->A, CD->B
+	};
+	sets.setNum(4);
+	for (int i = 0; i < dependenciesNum; i++)
+	{
+		sets.setDependencies(leftDependencies[i], rightDependencies[i]);
+	}
+}
+void defaultSetting1(form& sets)
+{
 	int attributesNum = 3;//A,B,C
 	int dependenciesNum = 6;
 	int leftDependencies[6][3] = {

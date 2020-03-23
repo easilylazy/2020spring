@@ -47,7 +47,18 @@ void printArray(int* array, int M, int N)
 	}
 }
 
+bool compareArray(int* firstArray, int* secondArray, int length)
+	{
+		for (int i = 0; i < length; i++)
+		{
+			if (firstArray[i] != secondArray[i])
+			{
+				return false;
+			}
+		}
 
+		return true;
+	}
 void form::setAttributes()
 {
 	int num = 0;
@@ -268,6 +279,36 @@ void form::printMinimaBases()
 		if (minimalBases[i].isValid == true)
 			minimalBases[i].printResult();
 	}
+}
+bool form::compare(minimalBase current, minimalBase exist)
+{
+
+	bool findIdentityDependency;
+	for (int i = 0; i < exist.getDependenciesNum(); i++)
+	{
+		if (exist.isNumValid(exist.rightDependencies[i]))
+		{
+			findIdentityDependency = false;
+
+			for (int j = 0; j < current.getDependenciesNum(); j++)
+			{
+				
+					if (exist.rightDependencies[i] == current.rightDependencies[j]
+						&& (compareArray(exist.leftDependencies[i], current.leftDependencies[j], current.attributesNum)))
+					{
+						findIdentityDependency = true;
+					}
+				
+			}
+
+			if (findIdentityDependency == false)
+			{
+				return false;
+			}
+		
+		}
+	}
+	return true;
 }
 void form::printInfo()
 {
@@ -719,6 +760,54 @@ void form::sendToClosure(int index, int mask)
 	}
 
 }
+void form::printFinalResult()
+{
+
+	{
+		int ct = 0;
+		bool findIdentityBase;
+#pragma region tips
+		if (language == "EN")
+		{
+			cout << "***************FINAL RESULT*****************" << endl;
+		}
+		if (language == "CN")
+		{
+			cout << "***************最终结果*****************" << endl;
+
+		}
+#pragma endregion
+
+
+		minimalBase current, exist;
+		for (int i = 0; i < minimalBasesNum; i++)
+		{
+			current.isValid = false;
+			current = minimalBases[i];
+			findIdentityBase = false;
+			for (int j = 0; j < i; j++)
+			{
+				exist = minimalBases[j];
+				if (exist.isValid == true)
+				{
+
+					//比较是否新增的依赖集中成员包括已有的某一个依赖集中找到
+					if (compare(current, exist) == true)
+					{
+						findIdentityBase = true;
+					}
+				}
+			}
+			if (findIdentityBase != true)
+			{
+				ct++;
+				cout << "***************" << ct << "*****************" << endl;
+				current.isValid = true;
+				current.printDependencies();
+			}
+		}
+	}
+}
 //递归函数，调用之前必须初始化controlDependencies
 //initControlDependencies();
 void form::findBasis()
@@ -849,8 +938,8 @@ bool form::changeControl()
 	int last0Site = -1;
 
 	//寻找除取末位 最后一个0出现的位置
-	//若末位的0已是最后的属性，则寻找上一位0，如果上一个0不存在，则退出程序，返回false
-	for (int i = 0; i < attributesNum - 1; i++)
+	//若末位的0已是最后的依赖，则寻找上一位0，如果上一个0不存在，则退出程序，返回false
+	for (int i = 0; i < dependenciesNum - 1; i++)
 	{
 		if (i > last0Site && basisDependencies[i] == 0)
 		{
