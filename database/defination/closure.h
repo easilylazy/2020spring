@@ -1,6 +1,6 @@
 #pragma once
 #include <malloc.h>
-
+#include <string>
 #include<iostream>
 //属性个数限制
 #define MAXSIZE 10
@@ -8,16 +8,214 @@
 #define MAXNUM 30
 //减少打印信息
 #define LESSINFO true 
+
+
 using namespace std;
+//class storageArray
+//{
+//private:
+//	int type; // 1为1维，2为2维
+//	int 
+//
+//public:
+//	storageArray(int& array)
+//	{
+//
+//	}
+//
+//};
 
-
-class form
+//英文
+extern string language;
+//提示
+extern bool displayTips;
+void initArray(int* array,int length,int initValue = 0);
+void printArray(int* array, int length);
+void initArray2d(int* array, int M, int N, int initValue = 0);
+void printArray(int* array, int M, int N);
+class minimalBase
 {
 private:
+	int dependenciesNum;
+	int finalDependenciesNum;
+	int attributesNum;
+	
+	int leftDependencies[MAXNUM][MAXSIZE];
+	int rightDependencies[MAXNUM];
+
+public:
+	bool isValid;//若记录的最小依赖集已存在相同的，则为false
+#pragma region 构函
+	minimalBase()
+	{
+		isValid = true;
+		dependenciesNum = 0;
+		finalDependenciesNum = 0;
+		attributesNum = 0;
+		//initLeft
+		initArray(rightDependencies, MAXNUM, -1);
+		initArray2d((int*)leftDependencies, MAXNUM, MAXSIZE);
+
+
+		//initRight();
+	}
+#pragma endregion
+
+#pragma region 设定
+	//设定属性值总数
+	void setAttributesNum(int num)
+	{
+		attributesNum = num;
+	}
+	//设定依赖集总数
+	void setDependenciesNum(int num)
+	{
+		dependenciesNum = num;
+	}
+	//设定依赖集内容
+	void setLeftDependency(int i, int j)
+	{
+		leftDependencies[i][j] = 1;
+	}
+	//设定依赖集内容
+	void setRightDependency(int index, int value)
+	{
+		rightDependencies[index] = value;
+	}
+#pragma endregion
+
+#pragma region 取值
+	int getDependenciesNum()
+	{
+		return dependenciesNum;
+	}
+#pragma endregion
+
+#pragma region 去重
+	//若依赖右部的内容已被前部包含(平凡依赖)，则去除该依赖（右部设为-1）
+	void dropTrivival()
+	{
+		for (int i = 0; i < dependenciesNum; i++)
+		{
+			int rightValue = rightDependencies[i];
+			if (rightValue >= 0
+				&& rightValue < dependenciesNum
+				&& leftDependencies[i][rightValue] == 1)
+			{
+				rightDependencies[i] = -1;
+			}
+			else if (rightValue >= 0
+				&& rightValue < dependenciesNum
+				&& leftDependencies[i][rightValue] != 1)
+			{
+				finalDependenciesNum++;
+			}
+		}
+	}
+	//若依赖右部的内容已被前部包含，则去除该依赖（右部设为-1）
+	void dropRepeated()
+	{
+		bool passCheck;
+		for (int i = 0; i < dependenciesNum; i++)
+		{
+			
+			//每个有效的依赖与之前的所有依赖比较，检查是否有完全重复的，若有，右部设为-1，依赖数目减1
+
+			if (isNumValid(rightDependencies[i]))
+			{
+				
+
+				for (int j = 0; j < i; j++)
+				{
+					//先比较右部
+					if (rightDependencies[i] == rightDependencies[j])
+					{
+						passCheck = false;
+						//若右部相同，比较左部数组是否完全相同
+						for (int k = 0; k < attributesNum; k++)
+						{
+							int currentValue = leftDependencies[i][k];
+							int pastValue = leftDependencies[j][k];
+							if (currentValue != pastValue)
+							{
+								//只要有一个不相同，那就通过检测
+								passCheck = true;
+								//break;
+							}
+						}
+
+						if (passCheck != true)
+						{
+							rightDependencies[i] = -1;
+							finalDependenciesNum--;
+						}
+					}
+				
+				}
+
+			
+			}
+		
+			
+
+
+			
+		}
+	}
+#pragma endregion
+
+#pragma region 打印
+	void printResult()
+	{
+
+#pragma region tips
+		string tip1, tip2;
+		if (language == "EN")
+		{
+			tip1 = "after drop trivival: ";
+			tip2 = "after drop repeated: ";
+		}
+		if (language=="CN")
+		{
+			tip1 = "去除平凡依赖后: ";
+			tip2 = "去除重复依赖后: ";
+		}
+#pragma endregion
+
+
+		printDependencies();
+		dropTrivival();
+		cout <<tip1 << endl;
+		printDependencies();
+		dropRepeated();
+		cout << tip2 << endl;
+		printDependencies();
+	}
+	void printDependencies();
+	void printAttributes(int* attributes, char choice);
+	bool isNumValid(int);
+#pragma endregion
+
+
+	friend void initArray(int* array, int length, int initvalue);
+	friend void initArray2d(int* array, int M, int N, int initValue);
+	friend void printArray(int* array, int length);
+	friend void printArray(int* array, int M, int N);
+
+	friend class form;
+};
+class form
+{
+
+private:
+	//最小依赖集个数
+	int minimalBasesNum;
+	//存储最小依赖集数据
+	minimalBase minimalBases[MAXSIZE];
 	//属性值总个数
 	int attributesNum;
 	//依赖函数总个数
-	int dependenciesNum;
+	int dependenciesNum; 
 	//右部全都转化为单值的依赖个数（暂未使用）
 	int toOneDependenciesNum;
 	//属性用数组储存（存在置为1）
@@ -25,7 +223,7 @@ private:
 	//储存依赖某一项的左部X，对应右部Y,有X->Y
 	int leftDependencies[MAXNUM][MAXSIZE];
 	//储存依赖某一项的右部Y，对应左部,有X->Y
-	int rightDependencies[MAXNUM][MAXSIZE];
+	int rightDependencies[MAXNUM][MAXSIZE];	
 
 
 	//右边转化为单值储存（暂未使用）
@@ -34,6 +232,9 @@ private:
 
 	//储存求得某函数依赖集关于某属性集的闭包结果
 	int closure[MAXSIZE];
+
+	//已经寻找完成闭包
+	bool closureFound;
 
 	//存储获取最小依赖集
 	int basisDependencies[MAXNUM];
@@ -44,15 +245,19 @@ private:
 
 	//最小依赖集是本身
 	bool ownIsBasis;
+	//已经寻找完成最小依赖集
+	bool basisFound;
 public:
 	//提示语
 	string tips = "(q to quit and s to save): ";
+	string tipsCN = "(输入 q 退出，输入 s 保存): ";
 
 	//构造函数，默认
 	form();
 	//传入属性个数
 	form(int num);
 
+#pragma region 初始化
 	//命令行读取输入属性个数
 	void setAttributes();
 	//判断输入属性值（数字/大写字母）是否合法
@@ -69,7 +274,10 @@ public:
 	void initControlDependencies();
 	//初始化掩码属性集（置0）
 	void initMaskAttributes();
+#pragma endregion
 
+	
+#pragma region 输入依赖
 	//更新属性个数，其他全部初始化
 	void setNum(int num);
 	//更新依赖集个数
@@ -88,8 +296,10 @@ public:
 	void setClosure();
 	//寻找某属性在某函数依赖集下的闭包
 	void findClosure();
+#pragma endregion
+	
 
-
+#pragma region 寻找依赖集
 	//寻找某函数依赖集的basis/最小依赖集
 	void findBasis();
 	//将第index依赖的所有属性传入closure
@@ -108,8 +318,113 @@ public:
 	//除了某删去第index依赖的第mask属性,将其他的属性传入closure
 	//再便于之后计算其他属性在其他函数依赖下的闭包能否覆盖删除属性，若能，则可删去该函数依赖下中左部的该属性
 	void sendToClosure(int index, int mask);
+#pragma endregion
 
+	//只打印和前面不完全相同的依赖集
+	void printFinalResult()
+	{
+		int ct=0;
+		bool findIdentityBase;
+#pragma region tips
+		if (language == "EN")
+		{
+			cout << "***************FINAL RESULT*****************" << endl;
+		}
+		if (language == "CN")
+		{
+			cout << "***************最终结果*****************" << endl;
 
+		}
+#pragma endregion
+
+		
+		minimalBase current, exist;
+		for (int i = 0; i < minimalBasesNum; i++)
+		{
+			current.isValid = false;
+			current = minimalBases[i];
+			findIdentityBase = false;
+			for (int j = 0; j < i; j++)
+			{			
+				exist = minimalBases[j];
+				if (exist.isValid == true)
+				{
+
+					//比较是否新增的依赖集中成员都能在已有的某一个依赖集中找到
+					if (compare(current, exist) == true)
+					{
+						findIdentityBase = true;
+					}
+				}				
+			}
+			if (findIdentityBase != true)
+			{
+				ct++;
+				cout << "***************" << ct << "*****************" << endl;
+				current.isValid = true;
+				current.printDependencies();
+			}
+		}
+	}
+	//比较两个数组中，完全一样返回true，否则返回false
+	bool compare(int* firstArray, int* secondArray, int length)
+	{
+		for (int i = 0; i < length; i++)
+		{
+			if (firstArray[i] != secondArray[i])
+			{
+				return false;
+			}
+		}
+
+		return true;
+	}
+	//比较两个数组中，如果current中的所有内容被exist包含，完全一样返回true，否则返回false
+	bool compare(minimalBase current, minimalBase exist)
+	{
+
+		bool findIdentityDependency;
+		for (int i = 0; i < current.getDependenciesNum(); i++)
+		{			
+			if (current.isNumValid(i))
+			{
+				findIdentityDependency = false;
+
+				for (int j = 0; j < exist.getDependenciesNum(); j++)
+				{
+					if (exist.rightDependencies[j] == current.rightDependencies[i]
+						&& (compare(exist.leftDependencies[j], current.leftDependencies[i], current.attributesNum)))
+					{
+						findIdentityDependency = true;
+					}
+				}
+
+				if (findIdentityDependency == false)
+				{
+					return false;
+				}
+			}
+			
+		}
+		return true;
+	}
+#pragma region 打印信息
+	//打印基本信息（全部）
+	void printInfo();
+	//打印最小函数依赖
+	void printBasis();
+	//将找到的最小函数依赖集保存至minimalBases中
+	void saveBasis();
+	//打印第index个属性名称
+	void printAttribute(int index);
+	//打印某个数组attributes中为1的值对应的字母名称
+	void printAttributes(int* attributes, char choice = 'w');
+
+	void printMinimaBases();
+#pragma endregion
+
+	
+		
 	void split()
 	{
 		//可以获取右部多于1的输入，并将其分解转化为全为1
@@ -121,12 +436,6 @@ public:
 		//X->A3
 		//TODO
 	}
-	//打印基本信息（全部）
-	void printInfo();
-	//打印最小函数依赖
-	void printBasis();
-	//打印第index个属性名称
-	void printAttribute(int index);
-	//打印某个数组attributes中为1的值对应的字母名称
-	void printAttributes(int* attributes, char choice = 'w');
+	friend class minimalBase;
+
 };

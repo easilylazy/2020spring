@@ -1,7 +1,7 @@
 #include"closure.h"
 form::form()
 {
-	int num = 1;
+	int num = 0;
 
 	setNum(num);
 }
@@ -9,28 +9,89 @@ form::form(int num)
 {
 	setNum(num);
 }
+void initArray(int* array, int length, int initValue)
+{
+	for (int i = 0; i < length; i++)
+	{
+		*(array + i) = initValue;
+	}
+}
+void printArray(int* array, int length)
+{
+	//int length = sizeof(array);
+	for (int i = 0; i < length; i++)
+	{
+		cout << i << ": ";
+		cout << *(array + i) << endl;
+	}
+}
+//二维
+void initArray2d(int* array, int M, int N, int initValue)
+{
+	for (int i = 0; i < M; i++)
+	{
+		for (int j = 0; j < N; j++)
+		{
+			*(array + i * N + j) = initValue;
+		}
+	}
+}
+void printArray(int* array, int M, int N)
+{
+	for (int i = 0; i < M; i++)
+	{
+		for (int j = 0; j < N; j++)
+		{
+			cout << i << "," << j << ": " << *(array + i * N + j) << endl;
+		}
+	}
+}
+
 
 void form::setAttributes()
 {
 	int num = 0;
 
-	cout << "How many attributes in total(1-10)?" << endl;
+#pragma region tips
+	string tip, tip1;
+	if (language == "EN")
+	{
+		tip = "How many attributes in total(range: 1-10)?";
+		tip1 = "(hint: next step can be a. addDependencies, and you can choose p.printInfo anytime to check the state)";
+	}
+
+	if (language == "CN")
+	{
+		tip = "共有多少属性(范围：1-10)?";
+		tip1 = "(提示：下一步为 a.添加函数依赖，在过程中你可以随时选择 p.打印现有信息 来检查状态";
+	}
+#pragma endregion
+
+	cout << tip << endl;
 	cin >> num;
 
 	while (num <= 0 || num > 10)
 	{
-		cout << "How many attributes in total(1-10)?" << endl;
+		cout << tip << endl;
 		cin >> num;
 	}
-
 	setNum(num);
+
+	if (displayTips == true)
+	{
+		cout << tip1 << endl;
+	}
+
 
 }
 void form::setNum(int num)
 {
 	attributesNum = num;
 	dependenciesNum = 0;
+	minimalBasesNum = 0;
 	ownIsBasis = true;
+	basisFound = false;
+	closureFound = false;
 	initAttributes();
 	initClosure();
 	initbasisDependencies();
@@ -108,8 +169,32 @@ bool form::isValid(char& ch)
 	}
 	else
 	{
-		cout << ch << " is invalid" << endl;
+#pragma region tips
+		string tip;
+		if (language == "EN")
+		{
+			tip = " is invalid";
+		}
+
+		if (language == "CN")
+		{
+			tip = "无效";
+		}
+		cout << ch << tip << endl;
 		printInfo();
+		if (language == "EN")
+		{
+			tip = "Enter again: ";
+		}
+
+		if (language == "CN")
+		{
+			tip = "重新输入：";
+		}
+		cout << tip << endl;
+#pragma endregion
+
+
 		return false;
 	}
 
@@ -117,11 +202,7 @@ bool form::isValid(char& ch)
 
 void form::initAttributes()
 {
-
-	for (int i = 0; i < attributesNum; i++)
-	{
-		attributes[i] = 1;
-	}
+	initArray(attributes, attributesNum, 1);
 }
 
 
@@ -143,10 +224,7 @@ void form::initDependencies(int index)
 }
 void form::initbasisDependencies()
 {
-	for (int i = 0; i < dependenciesNum; i++)
-	{
-		basisDependencies[i] = 1;//初始都包括
-	}
+	initArray(basisDependencies, dependenciesNum, 1);
 }
 void form::initControlDependencies()
 {
@@ -167,7 +245,7 @@ void form::initMaskAttributes()
 }
 void form::printAttributes(int* attributes, char choice)
 {
-	for (int i = 0; i < MAXSIZE; i++)
+	for (int i = 0; i < attributesNum; i++)
 	{
 		if (attributes[i] == 1)
 		{
@@ -180,16 +258,46 @@ void form::printAttributes(int* attributes, char choice)
 		}
 	}
 }
+void form::printMinimaBases()
+{
+	//minimalBasesNum = 3;
+
+	for (int i = 0; i < minimalBasesNum; i++)
+	{
+		cout << "***********************************" << endl;
+		if (minimalBases[i].isValid == true)
+			minimalBases[i].printResult();
+	}
+}
 void form::printInfo()
 {
-	//sizeof(attributes)/ sizeof(int) 
-	cout << "the sets has " << attributesNum << " attributes" << endl;
+	cout << "****************INFO*******************" << endl;
+#pragma region tips
 
+	string tip, tip1, tip2;
+	if (language == "EN")
+	{
+		tip = "the sets has " + to_string(attributesNum) + " attributes";
+		tip1 = "dependencies have " + to_string(dependenciesNum) + " sets";
+		tip2 = "closures are as follows: ";
+
+
+	}
+	if (language == "CN")
+	{
+		tip = "此属性集包含 " + to_string(attributesNum) + " 个属性";
+		tip1 = "此依赖集包含 " + to_string(dependenciesNum) + " 个函数依赖";
+		tip2 = "求取闭包如下所示： ";
+
+	}
+#pragma endregion
+
+	cout << tip << endl;
 	for (int i = 0; i < attributesNum; i++)
 	{
 		cout << i << ": " << char(i + 65) << endl;
 	}
-	cout << "determination have " << dependenciesNum << " sets" << endl;
+	cout << tip1 << endl;
 
 	for (int i = 0; i < dependenciesNum; i++)
 	{
@@ -201,23 +309,40 @@ void form::printInfo()
 
 	}
 
-	cout << "closure: " << endl;
-	for (int i = 0; i < attributesNum; i++)
-	{
 
-		if (closure[i] == 1)
-			cout << i << ": " << char(i + 65) << endl;
+
+	if (closureFound == true)
+	{
+		cout << tip2 << endl;
+		for (int i = 0; i < attributesNum; i++)
+		{
+
+			if (closure[i] == 1)
+				cout << i << ": " << char(i + 65) << endl;
+		}
 	}
 
-	printBasis();
-	/*for (int i = 0; i < sizeof(attributes); i++)
+	if (basisFound == true)
 	{
-		cout << attributes[i] << endl;
-	}*/
+		printBasis();
+	}
+
+	cout << "***********************************" << endl;
 }
 void form::printBasis()
 {
-	cout << "basis: " << endl;
+#pragma region tips
+	if (language == "EN")
+	{
+		cout << "basis: " << endl;
+	}
+	if (language == "CN")
+	{
+		cout << "最小函数依赖集有： " << endl;
+	}
+#pragma endregion
+
+
 	for (int i = 0; i < dependenciesNum; i++)
 	{
 		if (basisDependencies[i] == 1)
@@ -235,6 +360,45 @@ void form::printBasis()
 			cout << endl;
 		}
 	}
+}
+
+
+void form::saveBasis()
+{
+	basisFound = true;
+	minimalBase newBase;// = minimalBases[minimalBasesNum];
+
+	newBase.setAttributesNum(attributesNum);
+	newBase.setDependenciesNum(dependenciesNum);
+
+	//cout << "basis: " << endl;
+	for (int i = 0; i < dependenciesNum; i++)
+	{
+		if (basisDependencies[i] == 1)
+		{
+
+			for (int j = 0; j < attributesNum; j++)
+			{
+				//左边
+				if (maskAttributes[i][j] != -1 && leftDependencies[i][j] == 1)
+				{
+					//cout << char(j + 65);
+					newBase.setLeftDependency(i, j);
+
+				}
+				//->右边
+				if (rightDependencies[i][j] == 1)
+				{
+					//cout << char(j + 65);
+
+					newBase.setRightDependency(i, j);
+				}
+			}
+
+		}
+	}
+	minimalBases[minimalBasesNum] = newBase;
+	minimalBasesNum++;
 }
 void form::printAttribute(int index)
 {
@@ -267,8 +431,32 @@ void form::addDependency()
 	initDependencies(dependenciesNum);
 	char choice;
 
+#pragma region tips
+	if (language == "EN")
+	{
+		cout << "enter attributes determine others" << tips << endl;
+	}
+	if (language == "CN")
+	{
+		cout << "输入函数依赖左部的各个属性（输入单个属性名称，点击回车，再输入下一个）\n全部输入完后" << tipsCN << endl;
+	}
 
-	cout << "enter attributes determine others" << tips << endl;
+	if (LESSINFO != true)
+	{
+		if (language == "EN")
+		{
+			cout << "type: A【enter】C【enter】" << tips << endl;
+
+		}
+		if (language == "CN")
+		{
+			cout << "输入格式：A【enter】C【enter】" << tipsCN << endl;
+		}
+	}
+
+#pragma endregion
+
+
 
 	int leftNum = addSide(choice, leftDependencies[dependenciesNum]);
 
@@ -277,12 +465,31 @@ void form::addDependency()
 
 		if (LESSINFO == false)
 		{
-			cout << "you add " << leftNum << " attributes" << endl;
-			cout << "what you have typed is/are: " << endl;
+#pragma region tips
+			if (language == "EN")
+			{
+				cout << "you add " << leftNum << " attributes" << endl;
+				cout << "what you have typed is/are: " << endl;
+			}
+			if (language == "CN")
+			{
+				cout << "你输入了 " << leftNum << " 个属性" << endl;
+				cout << "它们是: " << endl;
+			}
+#pragma endregion
 			printAttributes(leftDependencies[dependenciesNum]);
 		}
+#pragma region tips
+		if (language == "EN")
+		{
+			cout << "enter attributes depending on above" << tips << endl;
+		}
+		if (language == "CN")
+		{
+			cout << "输入依赖于上述属性的单个属性（使用分解定律）" << tipsCN << endl;
+		}
+#pragma endregion
 
-		cout << "enter attributes depending on above" << tips << endl;
 
 		int rightNum = addSide(choice, rightDependencies[dependenciesNum]);
 
@@ -290,8 +497,7 @@ void form::addDependency()
 		{
 			if (LESSINFO == false)
 			{
-				cout << "you add " << rightNum << " attributes" << endl;
-				cout << "what you have typed is/are: " << endl;
+
 				printAttributes(rightDependencies[dependenciesNum]);
 			}
 
@@ -309,25 +515,69 @@ void form::addDependency()
 	{
 		return;
 	}
+#pragma region tips
+	string tip2, tip3;
+	if (language == "EN")
+	{
+		cout << "the total is: " << endl;
+		printAttributes(leftDependencies[dependenciesNum], 's');
+		cout << "->";
+		printAttributes(rightDependencies[dependenciesNum], 's');
+		cout << "\nDo you want to save" << tips << endl;
+		tip2 = "（if you feel tired of adding dependencies, you can try d.defaultExamples to test first）";
 
-	cout << "the total is: " << endl;
-	printAttributes(leftDependencies[dependenciesNum], 's');
-	cout << "->";
-	printAttributes(rightDependencies[dependenciesNum], 's');
-	cout << "\nDo you want to save" << tips << endl;
+		tip3 = "(hint: when you add all of the dependencies, next step can be s.setClosure, as the preparation for f.findClosure\n"\
+			"or b.basisDependencies )";
+	}
+	if (language == "CN")
+	{
+		cout << "本次输入为: " << endl;
+		printAttributes(leftDependencies[dependenciesNum], 's');
+		cout << "->";
+		printAttributes(rightDependencies[dependenciesNum], 's');
+		cout << "\n是否保存？（保存输入 s）" << tipsCN << endl;
+		tip2 = "（如果觉得输入繁琐，可以尝试 d.几个默认例子 先测试一下）";
+		tip3 = "(提示: 添加完函数依赖集后，下一步可以为 s.设定求取闭包的属性, 做为 f.开始寻找闭包 的准备 \n"\
+			"或者是 b.开始寻找最小依赖集 )";
+
+	}
+#pragma endregion
+
 	cin >> choice;
 	if (choice == 's')
 	{
 		//this->leftDependencies
 		dependenciesNum++;
 	}
+	if (dependenciesNum == 1)
+	{
+		cout << tip2 << endl;
+	}
+	if (displayTips == true)
+	{
+		cout << tip3 << endl;
+	}
+
+
 
 }
 
 void form::setClosure()
 {
+	closureFound = false;
 	char choice;
-	cout << "enter an attribut set" << tips << endl;
+#pragma region tips
+	if (language == "EN")
+	{
+		cout << "enter an attribut set" << tips << endl;
+	}
+	if (language == "CN")
+	{
+		cout << "输入需要寻找闭包的属性集" << tipsCN << endl;
+	}
+#pragma endregion
+
+
 
 	initClosure();
 
@@ -335,14 +585,35 @@ void form::setClosure()
 
 	if (choice == 's' && initNum > 0)
 	{
-		cout << "you choose " << initNum << " attributes" << endl;
-		cout << "what you have typed is/are: " << endl;
+#pragma region tips
+		string tip1;
+		if (language == "EN")
+		{
+			cout << "you choose " << initNum << " attributes" << endl;
+			cout << "what you have typed is/are: " << endl;
+			tip1 = "(hint: when you choose all of the attributes, next step can be f.findClosure )";
+		}
+		if (language == "CN")
+		{
+			cout << "你选择了 " << initNum << " 个属性" << endl;
+			cout << "它们是: " << endl;
+			tip1 = "(提示: 选择完求取闭包的初始属性后，下一步可以为 f.开始寻找闭包 )";
+
+		}
+#pragma endregion
+
 		printAttributes(closure);
+		if (displayTips == true)
+		{
+			cout << tip1 << endl;
+		}
+
 	}
 
 }
 void form::findClosure()
 {
+	closureFound = true;
 	bool isConsistent = true;
 	for (int i = 0; i < dependenciesNum; i++)
 	{
@@ -362,7 +633,15 @@ void form::findClosure()
 			{
 				if (rightDependencies[i][j] == 1 && closure[j] != 1)
 				{
-					cout << "add ";
+					if (language == "EN")
+					{
+						cout << "add:";
+					}
+					if (language == "CN")
+					{
+						cout << "新增:";
+					}
+
 					printAttribute(j);
 					cout << endl;
 					closure[j] = 1;
@@ -403,10 +682,6 @@ void form::findClosure(int index)
 			{
 				if (rightDependencies[i][j] == 1 && closure[j] != 1)
 				{
-					//不打印过程
-					/*cout << "add ";
-					printAttribute(j);
-					cout << endl;*/
 					closure[j] = 1;
 					findClosure(index);
 				}
@@ -493,13 +768,39 @@ void form::findBasis()
 		ownIsBasis = false;
 		cout << "\r";
 		initMaskAttributes();
-		cout << "after step 1:" << endl;
+
+#pragma region tips
+		if (language == "EN")
+		{
+			cout << "after step 1:" << endl;
+		}
+
+		if (language == "CN")
+		{
+			cout << "第 1 步处理（去除冗余函数依赖）后:" << endl;
+		}
 		printBasis();
 		//进一步对左边的属性进行处理
-
+#pragma endregion	
 		secondProcess();
-		cout << "after step 2:" << endl;
+#pragma region tips
+		if (language == "EN")
+		{
+			cout << "after step 2:" << endl;
+		}
+
+		if (language == "CN")
+		{
+			cout << "第 2 步处理（去除函数依赖中右部的冗余属性）后:" << endl;
+		}
 		printBasis();
+#pragma endregion
+
+
+		saveBasis();
+
+
+
 	}
 	//若仍有可改变的值，递归获取新的可能，否则return
 	if (changeControl() == true)
@@ -510,14 +811,35 @@ void form::findBasis()
 	{
 		if (ownIsBasis == true)
 		{
+			basisFound = true;
 			initMaskAttributes();
-			cout << "after step 1:" << endl;
+#pragma region 提示
+			if (language == "EN")
+			{
+				cout << "after step 1:" << endl;
+			}
+			if (language == "CN")
+			{
+				cout << "第1步后:" << endl;
+			}
+#pragma endregion
+
+
 			printBasis();
 			//进一步对左边的属性进行处理
 			secondProcess();
-			cout << "after step 2:" << endl;
+#pragma region 提示
+			if (language == "EN")
+			{
+				cout << "after step 2:" << endl;
+			}
+			if (language == "CN")
+			{
+				cout << "第2步后:" << endl;
+			}
+#pragma endregion
 			printBasis();
-
+			saveBasis();
 		}
 		return;
 	}
@@ -650,3 +972,49 @@ void form::secondProcess()
 
 }
 
+void minimalBase::printDependencies()
+{
+	for (int i = 0; i < dependenciesNum; i++)
+	{
+		int rightValue = rightDependencies[i];
+
+		if (isNumValid(rightValue))
+		{
+			printAttributes(leftDependencies[i], 's');
+			cout << "->";
+			cout << char(rightValue + 65) << endl;
+		}
+
+	}
+}
+void minimalBase::printAttributes(int* attributes, char choice)
+{
+	for (int i = 0; i < attributesNum; i++)
+	{
+		if (attributes[i] == 1)
+		{
+			if (choice == 's')
+			{
+				cout << char(i + 65);
+			}
+			else
+				cout << i << ": " << char(i + 65) << endl;
+		}
+	}
+}
+bool minimalBase::isNumValid(int value)
+{
+
+
+	//输入数组索引值
+	int ctoi = value;
+	if (ctoi >= 0 && ctoi < attributesNum)
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+
+}

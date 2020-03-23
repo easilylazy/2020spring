@@ -1,5 +1,7 @@
 #pragma once
 #include "closure.h"
+
+void chooseDefault(form& sets);
 //PPT上例子
 void defaultSetting(form& sets);
 //博客中例子https://blog.csdn.net/Game_Zmh/article/details/88061628

@@ -1,8 +1,56 @@
 #include "example.h"
 
+void chooseDefault(form& sets)
+{
+
+	int chooseExample = 0;
+
+	string exampleTip = "Which example do you want to test? (range: 0-2)";
+	string exampleTipCN = "你想测试哪个例子? (范围: 0-2)";
+
+	if (language == "EN")
+	{
+		cout << exampleTip;
+	}
+	if (language == "CN")
+	{
+		cout << exampleTipCN;
+	}
+	cin >> chooseExample;
+
+	switch (chooseExample)
+	{
+	case 0:
+		defaultSetting(sets);
+		break;
+	case 1:
+		defaultSetting2(sets);
+		break;
+	case  2:
+		defaultSetting3(sets);
+		break;
+	default:
+		cout << "0 or 1 or 2" << endl;
+		break;
+	}
+}
+
 //PPT上例子
 void defaultSetting(form& sets)
 {
+#pragma region tips
+	string tip;
+	if (language == "EN")
+	{
+		tip = "this example was taken from PPT";
+	}
+	if (language == "CN")
+	{
+		tip = "本例来源：PPT";
+	}
+	cout << tip << endl;
+#pragma endregion
+
 	int attributesNum = 3;//A,B,C
 	int dependenciesNum = 6;
 	int leftDependencies[6][3] = {
@@ -25,6 +73,19 @@ void defaultSetting(form& sets)
 //博客中例子https://blog.csdn.net/Game_Zmh/article/details/88061628
 void defaultSetting2(form& sets)
 {
+#pragma region tips
+	string tip;
+	if (language == "EN")
+	{
+		tip = "this example was taken from website: https://blog.csdn.net/Game_Zmh/article/details/88061628";
+	}
+	if (language == "CN")
+	{
+		tip = "本例来源：https://blog.csdn.net/Game_Zmh/article/details/88061628";
+	}
+	cout << tip << endl;
+#pragma endregion
+
 	int attributesNum = 5;//A,B,C,D,E
 	int dependenciesNum = 5;
 
@@ -49,6 +110,18 @@ void defaultSetting2(form& sets)
 //博客中例子https://www.cnblogs.com/wangyige/p/6786047.html
 void defaultSetting3(form& sets)
 {
+#pragma region tips
+	string tip;
+	if (language == "EN")
+	{
+		tip = "this example was taken from website: https://www.cnblogs.com/wangyige/p/6786047.html";
+	}
+	if (language == "CN")
+	{
+		tip = "本例来源：https://www.cnblogs.com/wangyige/p/6786047.html";
+	}
+	cout << tip << endl;
+#pragma endregion
 	int attributesNum = 10;//A,B,C,D,E,F,G,H
 	int dependenciesNum = 6;
 
