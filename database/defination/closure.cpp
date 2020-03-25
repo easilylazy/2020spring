@@ -98,7 +98,8 @@ void form::setAttributes()
 void form::setNum(int num)
 {
 	attributesNum = num;
-	dependenciesNum = 0;
+	toOneDependenciesNum = 0;
+	toOneDependenciesNum = 0;
 	minimalBasesNum = 0;
 	ownIsBasis = true;
 	basisFound = false;
@@ -110,18 +111,18 @@ void form::setNum(int num)
 }
 void form::setDependenciesNum(int num)
 {
-	dependenciesNum = num;
+	toOneDependenciesNum = num;
 }
 //改变依赖的值设定，site为'l'选择改变左边的被依赖项，'r'改变右边依赖项; i,j表示改变第i项的第j个属性值为value（0/1）
 void form::setDependency(char site, int i, int j, int value = 1)
 {
 	if (site == 'l')
 	{
-		leftDependencies[i][j] = value;
+		toOneLeftDependencies[i][j] = value;
 	}
 	if (site == 'r')
 	{
-		rightDependencies[i][j] = value;
+		toOneRightDependencies[i] = value;
 	}
 
 }
@@ -133,36 +134,110 @@ void form::setDependencies(int* leftDependency, int* rightDependency, int state)
 	{
 		for (int i = 0; i < attributesNum; i++)
 		{
-			leftDependencies[dependenciesNum][i] = leftDependency[i];
-			rightDependencies[dependenciesNum][i] = rightDependency[i];
+
+
+			//使用分解
+			if (rightDependency[i] == 1)
+			{
+				toOneRightDependencies[toOneDependenciesNum] = i;
+				for (int j = 0; j < attributesNum; j++)
+				{
+					toOneLeftDependencies[toOneDependenciesNum][j] = leftDependency[j];
+				}
+				printAttributes(toOneLeftDependencies[toOneDependenciesNum], 's');
+				cout << "->";
+				printAttribute(i);
+				cout << endl;
+				toOneDependenciesNum++;
+			}
 		}
-		dependenciesNum++;
 
 	}
 	else
-	{
+	{		
 		for (int i = 0; i < attributesNum; i++)
 		{
-			leftDependencies[state][i] = leftDependency[i];
-			rightDependencies[state][i] = rightDependency[i];
+			if (rightDependency[i] == 1)
+			{
+				toOneRightDependencies[state] = i;
+			}
+			toOneLeftDependencies[state][i] = leftDependency[i];
+			
 		}
 	}
 }
 
 int form::getRightDependency(int index)
 {
-	for (int j = 0; j < attributesNum; j++)
-	{
-		if (rightDependencies[index][j] == 1)
-		{
-			return j;//目标值
-		}
-	}
-	return -1;
+	return toOneRightDependencies[index];
 }
+bool form::isValidNew(char& ch)
+{
+#pragma region tips
+	string tip, tip1;
+	if (language == "EN")
+	{
+		tip = " is invalid";
+		tip1 = "Enter again: ";
+	}
 
+	if (language == "CN")
+	{
+		tip = "无效";
+		tip1 = "重新输入：";
+	}
+
+#pragma endregion
+	//大写字母
+	int ctoc = ch - 65;
+	if (ctoc >= 0 && ctoc < attributesNum)
+	{
+		ch = ctoc;
+		return true;
+	}
+	//小写字母
+	ctoc = ch - 97;
+	if (ctoc >= 0 && ctoc < attributesNum)
+	{
+		ch = ctoc;
+		return true;
+	}
+
+	//输入数组索引值
+	int ctoi = ch - 48;
+	if (ctoi >= 0 && ctoi < attributesNum)
+	{
+		ch = ctoi;
+		return true;
+	}
+	else
+	{
+
+		cout << ch << tip << endl;
+		printInfo();
+		cout << tip1 << endl;
+
+		return false;
+	}
+
+}
 bool form::isValid(char& ch)
 {
+#pragma region tips
+	string tip, tip1;
+	if (language == "EN")
+	{
+		tip = " is invalid";
+		tip1 = "Enter again: ";
+	}
+
+	if (language == "CN")
+	{
+		tip = "无效";
+		tip1 = "重新输入：";
+	}
+
+#pragma endregion
 	//输入字母
 	int ctoc = ch - 65;
 	if (ctoc >= 0 && ctoc < attributesNum)
@@ -180,31 +255,9 @@ bool form::isValid(char& ch)
 	}
 	else
 	{
-#pragma region tips
-		string tip;
-		if (language == "EN")
-		{
-			tip = " is invalid";
-		}
-
-		if (language == "CN")
-		{
-			tip = "无效";
-		}
 		cout << ch << tip << endl;
 		printInfo();
-		if (language == "EN")
-		{
-			tip = "Enter again: ";
-		}
-
-		if (language == "CN")
-		{
-			tip = "重新输入：";
-		}
-		cout << tip << endl;
-#pragma endregion
-
+		cout << tip1 << endl;
 
 		return false;
 	}
@@ -229,24 +282,30 @@ void form::initDependencies(int index)
 {
 	for (int i = 0; i < attributesNum; i++)
 	{
-		leftDependencies[index][i] = 0;
-		rightDependencies[index][i] = 0;
+		toOneLeftDependencies[index][i] = 0;
+		toOneRightDependencies[index] = -1;
 	}
+}
+void form::initMinimalBases()
+{
+	minimalBasesNum = 0;
+	current.isValid = false;
+	last.isValid = false;
 }
 void form::initbasisDependencies()
 {
-	initArray(basisDependencies, dependenciesNum, 1);
+	initArray(basisDependencies, toOneDependenciesNum, 1);
 }
 void form::initControlDependencies()
 {
-	for (int i = 0; i < dependenciesNum; i++)
+	for (int i = 0; i < toOneDependenciesNum; i++)
 	{
 		controlDependencies[i] = 1;//初始都包括
 	}
 }
 void form::initMaskAttributes()
 {
-	for (int i = 0; i < dependenciesNum; i++)
+	for (int i = 0; i < toOneDependenciesNum; i++)
 	{
 		for (int j = 0; j < attributesNum; j++)
 		{
@@ -278,6 +337,15 @@ void form::printMinimaBases()
 		cout << "***********************************" << endl;
 		if (minimalBases[i].isValid == true)
 			minimalBases[i].printResult();
+	}
+}
+void form::printMinimaBases(minimalBase base)
+{
+	for (int i = 0; i < minimalBasesNum; i++)
+	{
+		cout << "***********************************" << endl;
+		if (base.isValid == true)
+			base.printResult();
 	}
 }
 bool form::compare(minimalBase current, minimalBase exist)
@@ -319,7 +387,7 @@ void form::printInfo()
 	if (language == "EN")
 	{
 		tip = "the sets has " + to_string(attributesNum) + " attributes";
-		tip1 = "dependencies have " + to_string(dependenciesNum) + " sets";
+		tip1 = "dependencies have " + to_string(toOneDependenciesNum) + " sets";
 		tip2 = "closures are as follows: ";
 
 
@@ -327,7 +395,7 @@ void form::printInfo()
 	if (language == "CN")
 	{
 		tip = "此属性集包含 " + to_string(attributesNum) + " 个属性";
-		tip1 = "此依赖集包含 " + to_string(dependenciesNum) + " 个函数依赖";
+		tip1 = "此依赖集包含 " + to_string(toOneDependenciesNum) + " 个函数依赖";
 		tip2 = "求取闭包如下所示： ";
 
 	}
@@ -340,12 +408,12 @@ void form::printInfo()
 	}
 	cout << tip1 << endl;
 
-	for (int i = 0; i < dependenciesNum; i++)
+	for (int i = 0; i < toOneDependenciesNum; i++)
 	{
-		//if (leftDependencies[i][j] == 1)
-		printAttributes(leftDependencies[i], 's');
+		//if (toOneLeftDependencies[i][j] == 1)
+		printAttributes(toOneLeftDependencies[i], 's');
 		cout << "->";
-		printAttributes(rightDependencies[i], 's');
+		printAttribute(toOneRightDependencies[i]);
 		cout << endl;
 
 	}
@@ -365,7 +433,8 @@ void form::printInfo()
 
 	if (basisFound == true)
 	{
-		printBasis();
+		initControlDependencies();
+		printFinalResult();
 	}
 
 	cout << "***********************************" << endl;
@@ -384,36 +453,35 @@ void form::printBasis()
 #pragma endregion
 
 
-	for (int i = 0; i < dependenciesNum; i++)
+	for (int i = 0; i < toOneDependenciesNum; i++)
 	{
 		if (basisDependencies[i] == 1)
 		{
-			//printAttributes(leftDependencies[i], 's');
+			//printAttributes(toOneLeftDependencies[i], 's');
 			for (int j = 0; j < attributesNum; j++)
 			{
-				if (maskAttributes[i][j] != -1 && leftDependencies[i][j] == 1)
+				if (maskAttributes[i][j] != -1 && toOneLeftDependencies[i][j] == 1)
 				{
 					cout << char(j + 65);
 				}
 			}
 			cout << "->";
-			printAttributes(rightDependencies[i], 's');
+			printAttribute(toOneRightDependencies[i]);
 			cout << endl;
 		}
 	}
 }
-
-
-void form::saveBasis()
+//保存最小基至某base
+void form::saveBasis(minimalBase& saveTo)
 {
 	basisFound = true;
 	minimalBase newBase;// = minimalBases[minimalBasesNum];
 
 	newBase.setAttributesNum(attributesNum);
-	newBase.setDependenciesNum(dependenciesNum);
+	newBase.setDependenciesNum(toOneDependenciesNum);
 
 	//cout << "basis: " << endl;
-	for (int i = 0; i < dependenciesNum; i++)
+	for (int i = 0; i < toOneDependenciesNum; i++)
 	{
 		if (basisDependencies[i] == 1)
 		{
@@ -421,25 +489,61 @@ void form::saveBasis()
 			for (int j = 0; j < attributesNum; j++)
 			{
 				//左边
-				if (maskAttributes[i][j] != -1 && leftDependencies[i][j] == 1)
+				if (maskAttributes[i][j] != -1 && toOneLeftDependencies[i][j] == 1)
 				{
 					//cout << char(j + 65);
 					newBase.setLeftDependency(i, j);
 
 				}
-				//->右边
-				if (rightDependencies[i][j] == 1)
+				
+			}
+			//->右边
+			newBase.setRightDependency(i, toOneRightDependencies[i]);
+			
+
+		}
+	}
+	saveTo = newBase;
+	saveTo.isValid = true;
+}
+bool form::saveBasis()
+{
+	basisFound = true;
+	minimalBase newBase;// = minimalBases[minimalBasesNum];
+
+	newBase.setAttributesNum(attributesNum);
+	newBase.setDependenciesNum(toOneDependenciesNum);
+
+	//cout << "basis: " << endl;
+	for (int i = 0; i < toOneDependenciesNum; i++)
+	{
+		if (basisDependencies[i] == 1)
+		{
+
+			for (int j = 0; j < attributesNum; j++)
+			{
+				//左边
+				if (maskAttributes[i][j] != -1 && toOneLeftDependencies[i][j] == 1)
 				{
 					//cout << char(j + 65);
+					newBase.setLeftDependency(i, j);
 
-					newBase.setRightDependency(i, j);
-				}
+				}				
 			}
+			//->右边
+			newBase.setRightDependency(i, toOneRightDependencies[i]);
 
 		}
 	}
 	minimalBases[minimalBasesNum] = newBase;
 	minimalBasesNum++;
+	if (minimalBasesNum >= BASESMAXNUM)
+	{
+		cout << "limited storage" << endl;
+		return false;
+	}
+	return true;
+	
 }
 void form::printAttribute(int index)
 {
@@ -469,138 +573,111 @@ int form::addSide(char& choice, int* determine)
 }
 void form::addDependency()
 {
-	initDependencies(dependenciesNum);
-	char choice;
-
 #pragma region tips
+
+	string tip, tip1, tip2, tip3;
 	if (language == "EN")
 	{
-		cout << "enter attributes determine others" << tips << endl;
+		tip = "enter attributes determine others";
+		tip1 = "type: A->C【enter】";
+		tip2 = tips;
+		tip3 = "not Saved";
 	}
 	if (language == "CN")
 	{
-		cout << "输入函数依赖左部的各个属性（输入单个属性名称，点击回车，再输入下一个）\n全部输入完后" << tipsCN << endl;
+		tip = "输入函数依赖:";	
+		tip1 = "输入格式：A->C【enter】";
+		tip2 = tipsCN;
+		tip3 = "未保存";
 	}
 
-	if (LESSINFO != true)
-	{
-		if (language == "EN")
-		{
-			cout << "type: A【enter】C【enter】" << tips << endl;
-
-		}
-		if (language == "CN")
-		{
-			cout << "输入格式：A【enter】C【enter】" << tipsCN << endl;
-		}
-	}
 
 #pragma endregion
+	initDependencies(toOneDependenciesNum);
+	initMinimalBases();
 
+	string input;
+	string left, right;
 
+	int leftArray[MAXSIZE], rightArray[MAXSIZE];
 
-	int leftNum = addSide(choice, leftDependencies[dependenciesNum]);
-
-	if (choice == 's' && leftNum > 0)
-	{
-
-		if (LESSINFO == false)
-		{
-#pragma region tips
-			if (language == "EN")
-			{
-				cout << "you add " << leftNum << " attributes" << endl;
-				cout << "what you have typed is/are: " << endl;
-			}
-			if (language == "CN")
-			{
-				cout << "你输入了 " << leftNum << " 个属性" << endl;
-				cout << "它们是: " << endl;
-			}
-#pragma endregion
-			printAttributes(leftDependencies[dependenciesNum]);
-		}
-#pragma region tips
-		if (language == "EN")
-		{
-			cout << "enter attributes depending on above" << tips << endl;
-		}
-		if (language == "CN")
-		{
-			cout << "输入依赖于上述属性的单个属性（使用分解定律）" << tipsCN << endl;
-		}
-#pragma endregion
-
-
-		int rightNum = addSide(choice, rightDependencies[dependenciesNum]);
-
-		if (choice == 's' && rightNum > 0)
-		{
-			if (LESSINFO == false)
-			{
-
-				printAttributes(rightDependencies[dependenciesNum]);
-			}
-
-
-			if (rightNum > 1)
-			{
-				split();//使用splitting rule(分解率)将右边转化为全为1项
-			}
-
-		}
-
-	}
-
-	if (choice == 'q')
-	{
-		return;
-	}
-#pragma region tips
-	string tip2, tip3;
-	if (language == "EN")
-	{
-		cout << "the total is: " << endl;
-		printAttributes(leftDependencies[dependenciesNum], 's');
-		cout << "->";
-		printAttributes(rightDependencies[dependenciesNum], 's');
-		cout << "\nDo you want to save" << tips << endl;
-		tip2 = "（if you feel tired of adding dependencies, you can try d.defaultExamples to test first）";
-
-		tip3 = "(hint: when you add all of the dependencies, next step can be s.setClosure, as the preparation for f.findClosure\n"\
-			"or b.basisDependencies )";
-	}
-	if (language == "CN")
-	{
-		cout << "本次输入为: " << endl;
-		printAttributes(leftDependencies[dependenciesNum], 's');
-		cout << "->";
-		printAttributes(rightDependencies[dependenciesNum], 's');
-		cout << "\n是否保存？（保存输入 s）" << tipsCN << endl;
-		tip2 = "（如果觉得输入繁琐，可以尝试 d.几个默认例子 先测试一下）";
-		tip3 = "(提示: 添加完函数依赖集后，下一步可以为 s.设定求取闭包的属性, 做为 f.开始寻找闭包 的准备 \n"\
-			"或者是 b.开始寻找最小依赖集 )";
-
-	}
-#pragma endregion
-
-	cin >> choice;
-	if (choice == 's')
-	{
-		//this->leftDependencies
-		dependenciesNum++;
-	}
-	if (dependenciesNum == 1)
-	{
-		cout << tip2 << endl;
-	}
+	cout << tip << endl;
 	if (displayTips == true)
 	{
-		cout << tip3 << endl;
+		cout << tip1 << endl;
+	}
+	cin >> input;
+	int n;
+	bool validInput = true;
+	char choice;
+	if ((n = input.find("->")) != string::npos)
+	{
+		left = input.substr(0, n);		
+		right = input.substr(n + 2);
+	}
+	else if ((n = input.find("-")) != string::npos)
+	{
+		left = input.substr(0, n);
+		right = input.substr(n + 1);
+	}
+	else
+	{
+		validInput = false;
+	}
+	int leftNum = left.length();
+	int rightNum = right.length();
+
+	if (leftNum > 0 && rightNum > 0)
+	{
+
+		initArray(leftArray, attributesNum);
+		initArray(rightArray, attributesNum);
+		
+		for (int i = 0; i < leftNum; i++)
+		{
+			if (isValidNew(left[i]))
+			{
+				leftArray[left[i]] = 1;
+			}
+			else
+			{
+				validInput = false;
+			}
+		}		
+		for (int i = 0; i < rightNum; i++)
+		{
+			if (isValidNew(right[i]))
+			{
+				rightArray[right[i]] = 1;
+			}
+			else
+			{
+				validInput = false;
+			}
+		}
+	}
+	else
+	{
+		validInput = false;
 	}
 
 
+	if (validInput == true)
+	{
+		cout << tip2 << endl;
+		cin >> choice;
 
+
+		if (choice == 's'|| choice == 'S')
+		{
+			setDependencies(leftArray, rightArray, -1);			
+		}		
+		else
+		{
+			cout << tip3 << endl;
+		}
+	}
+	return ;
 }
 
 void form::setClosure()
@@ -656,39 +733,35 @@ void form::findClosure()
 {
 	closureFound = true;
 	bool isConsistent = true;
-	for (int i = 0; i < dependenciesNum; i++)
+	for (int i = 0; i < toOneDependenciesNum; i++)
 	{
 		isConsistent = true;
 		for (int j = 0; j < attributesNum; j++)
 		{
-			if (leftDependencies[i][j] == 1 && closure[j] != 1)
+			if (toOneLeftDependencies[i][j] == 1 && closure[j] != 1)
 			{
 				isConsistent = false;
 				break;
 			}
 
 		}
-		if (isConsistent == true)
+		if (isConsistent == true
+			&& closure[toOneRightDependencies[i]] != 1)
 		{
-			for (int j = 0; j < attributesNum; j++)
+			if (language == "EN")
 			{
-				if (rightDependencies[i][j] == 1 && closure[j] != 1)
-				{
-					if (language == "EN")
-					{
-						cout << "add:";
-					}
-					if (language == "CN")
-					{
-						cout << "新增:";
-					}
-
-					printAttribute(j);
-					cout << endl;
-					closure[j] = 1;
-					findClosure();
-				}
+				cout << "add:";
 			}
+			if (language == "CN")
+			{
+				cout << "新增:";
+			}
+
+			printAttribute(toOneRightDependencies[i]);
+			cout << endl;
+			closure[toOneRightDependencies[i]] = 1;
+			findClosure();
+
 		}
 	}
 	return;
@@ -698,7 +771,7 @@ void form::findClosure()
 void form::findClosure(int index)
 {
 	bool isConsistent = true;
-	for (int i = 0; i < dependenciesNum; i++)
+	for (int i = 0; i < toOneDependenciesNum; i++)
 	{
 		//若将某依赖除去，则跳过
 		if (basisDependencies[i] != 1)
@@ -710,23 +783,20 @@ void form::findClosure(int index)
 		isConsistent = true;
 		for (int j = 0; j < attributesNum; j++)
 		{
-			if (leftDependencies[i][j] == 1 && closure[j] != 1)
+			if (toOneLeftDependencies[i][j] == 1 && closure[j] != 1)
 			{
 				isConsistent = false;
 				break;
 			}
 
 		}
-		if (isConsistent == true)
-		{
-			for (int j = 0; j < attributesNum; j++)
-			{
-				if (rightDependencies[i][j] == 1 && closure[j] != 1)
-				{
-					closure[j] = 1;
-					findClosure(index);
-				}
-			}
+		if (isConsistent == true
+			&& closure[toOneRightDependencies[i]] != 1)
+		{	
+			
+			closure[toOneRightDependencies[i]] = 1;
+			findClosure(index);		
+			
 		}
 	}
 	return;
@@ -737,7 +807,7 @@ void form::sendToClosure(int index)
 
 	for (int j = 0; j < attributesNum; j++)
 	{
-		if (leftDependencies[index][j] == 1)
+		if (toOneLeftDependencies[index][j] == 1)
 		{
 			closure[j] = 1;
 		}
@@ -753,65 +823,144 @@ void form::sendToClosure(int index, int mask)
 	for (int j = 0; j < attributesNum; j++)
 	{
 
-		if (j != mask && leftDependencies[index][j] == 1)
+		if (j != mask && toOneLeftDependencies[index][j] == 1)
 		{
 			closure[j] = 1;
 		}
 	}
 
 }
-void form::printFinalResult()
+bool form::printFinalResult(minimalBase& current)
 {
 
-	{
-		int ct = 0;
-		bool findIdentityBase;
 #pragma region tips
-		if (language == "EN")
-		{
-			cout << "***************FINAL RESULT*****************" << endl;
-		}
-		if (language == "CN")
-		{
-			cout << "***************最终结果*****************" << endl;
 
-		}
+	string tip,tip1;
+	if (language == "EN")
+	{
+		tip= "***************PERMANENT RESULT*****************";
+		tip1 = "***************OVERFLOW!*****************";
+
+	}
+	if (language == "CN")
+	{
+		
+		tip = "***************暂时结果*****************";
+		tip1 = "***************结果溢出！*****************";
+
+	}
 #pragma endregion
+	bool findIdentityBase;
+	current.isValid = false;
+	findIdentityBase = false;
 
+	if (last.isValid == true)
+	{
 
-		minimalBase current, exist;
-		for (int i = 0; i < minimalBasesNum; i++)
+		//比较是否新增的依赖集中成员包括已有的某一个依赖集中找到
+		if (compare(current, last) == true)
 		{
-			current.isValid = false;
-			current = minimalBases[i];
-			findIdentityBase = false;
-			for (int j = 0; j < i; j++)
-			{
-				exist = minimalBases[j];
-				if (exist.isValid == true)
-				{
-
-					//比较是否新增的依赖集中成员包括已有的某一个依赖集中找到
-					if (compare(current, exist) == true)
-					{
-						findIdentityBase = true;
-					}
-				}
-			}
-			if (findIdentityBase != true)
-			{
-				ct++;
-				cout << "***************" << ct << "*****************" << endl;
-				current.isValid = true;
-				current.printDependencies();
-			}
+			findIdentityBase = true;
 		}
 	}
+
+	if (findIdentityBase != true)
+	{
+		current.isValid = true;
+		if (hideProcess == false)
+		{
+			cout << tip << endl;
+			current.printDependencies();
+		}		
+		minimalBases[minimalBasesNum] = current;
+		minimalBasesNum++;
+		if (minimalBasesNum >= BASESMAXNUM)
+		{
+			cout << tip1 << endl;
+			overFlow = true;
+			return false;
+		}
+		last = current;
+	}
+	return true;
+	
 }
+void form::printFinalResult()
+{
+#pragma region tips
+	string tip, tip1;
+	if (language == "EN")
+	{
+		tip = "***************FINAL RESULT*****************";
+		tip1 = "---The result is incompelete for the limited storage---";
+
+	}
+	if (language == "CN")
+	{
+
+		tip = "***************最终结果*****************";
+		tip1 = "---由于存储空间有限，只打印部分结果---";
+
+	}
+#pragma endregion
+	int ct = 0;
+	bool findIdentityBase;
+
+	minimalBase current, exist;
+	cout << tip << endl;
+	for (int i = 0; i < minimalBasesNum; i++)
+	{
+		current.isValid = false;
+		current = minimalBases[i];
+		findIdentityBase = false;
+		for (int j = 0; j < i; j++)
+		{
+			exist = minimalBases[j];
+			if (exist.isValid == true)
+			{
+
+				//比较是否新增的依赖集中成员包括已有的某一个依赖集中找到
+				if (compare(current, exist) == true)
+				{
+					findIdentityBase = true;
+				}
+			}
+		}
+		if (findIdentityBase != true)
+		{
+			ct++;
+			cout << "***************" << ct << "*****************" << endl;
+			current.isValid = true;
+			current.printDependencies();
+		}
+	}
+
+	if (overFlow == true)
+	{
+		cout <<tip1 << endl;
+	}
+}
+
 //递归函数，调用之前必须初始化controlDependencies
 //initControlDependencies();
-void form::findBasis()
+bool form::findBasis()
 {
+#pragma region tips
+	string tip, tip1, tip2;
+	if (language == "EN")
+	{
+		tip = "after step 1:";
+		tip1 = "after step 2:";
+	}
+
+	if (language == "CN")
+	{
+		tip = "第 1 步处理（去除冗余函数依赖）后:";
+		tip1 = "第 2 步处理（去除函数依赖中右部的冗余属性）后:";
+	}
+	//进一步对左边的属性进行处理
+#pragma endregion	
+	
 	//依次删除一个依赖X'->Y'，寻找新依赖集中能否推出Y'
 	//若能，则可被删除；否则不能被删除
 
@@ -821,7 +970,7 @@ void form::findBasis()
 	bool basisFound = false;
 	initbasisDependencies();
 
-	for (int i = 0; i < dependenciesNum; i++)
+	for (int i = 0; i < toOneDependenciesNum; i++)
 	{
 		int targetValue = 0;
 
@@ -858,38 +1007,27 @@ void form::findBasis()
 		cout << "\r";
 		initMaskAttributes();
 
-#pragma region tips
-		if (language == "EN")
+		
+		if (hideProcess == false)
 		{
-			cout << "after step 1:" << endl;
+			cout << tip << endl;
+			printBasis();
+			secondProcess();
+			cout << tip1 << endl;
+			printBasis();
 		}
-
-		if (language == "CN")
+		else
 		{
-			cout << "第 1 步处理（去除冗余函数依赖）后:" << endl;
+			secondProcess();
 		}
-		printBasis();
-		//进一步对左边的属性进行处理
-#pragma endregion	
-		secondProcess();
-#pragma region tips
-		if (language == "EN")
+		saveBasis(current);
+		current.printResult();
+		
+		if (printFinalResult(current) == false)
 		{
-			cout << "after step 2:" << endl;
+			return false;
 		}
-
-		if (language == "CN")
-		{
-			cout << "第 2 步处理（去除函数依赖中右部的冗余属性）后:" << endl;
-		}
-		printBasis();
-#pragma endregion
-
-
-		saveBasis();
-
-
-
+		
 	}
 	//若仍有可改变的值，递归获取新的可能，否则return
 	if (changeControl() == true)
@@ -902,35 +1040,28 @@ void form::findBasis()
 		{
 			basisFound = true;
 			initMaskAttributes();
-#pragma region 提示
-			if (language == "EN")
-			{
-				cout << "after step 1:" << endl;
-			}
-			if (language == "CN")
-			{
-				cout << "第1步后:" << endl;
-			}
-#pragma endregion
 
+			if (hideProcess == false)
+			{
+				cout << tip << endl;
+				printBasis();
+				secondProcess();
+				cout << tip1 << endl;
+				printBasis();
+			}
+			else
+			{
+				secondProcess();
+			}
+			saveBasis(current);
+			current.printResult();
 
-			printBasis();
-			//进一步对左边的属性进行处理
-			secondProcess();
-#pragma region 提示
-			if (language == "EN")
+			if (printFinalResult(current) == false)
 			{
-				cout << "after step 2:" << endl;
+				return false;
 			}
-			if (language == "CN")
-			{
-				cout << "第2步后:" << endl;
-			}
-#pragma endregion
-			printBasis();
-			saveBasis();
 		}
-		return;
+		return true;
 	}
 }
 bool form::changeControl()
@@ -939,7 +1070,7 @@ bool form::changeControl()
 
 	//寻找除取末位 最后一个0出现的位置
 	//若末位的0已是最后的依赖，则寻找上一位0，如果上一个0不存在，则退出程序，返回false
-	for (int i = 0; i < dependenciesNum - 1; i++)
+	for (int i = 0; i < toOneDependenciesNum - 1; i++)
 	{
 		if (i > last0Site && basisDependencies[i] == 0)
 		{
@@ -956,9 +1087,9 @@ bool form::changeControl()
 	controlDependencies[last0Site] = -1;
 
 	//将置-1后的的控制变量为-1的项置1，保留前面的值
-	for (int i = 0; i < attributesNum; i++)
+	for (int i = 0; i < toOneDependenciesNum; i++)
 	{
-		if (i > last0Site && controlDependencies[i] == -1)
+		if (i > last0Site && controlDependencies[i] !=1 )
 		{
 			controlDependencies[i] = 1;
 		}
@@ -971,7 +1102,7 @@ bool form::changeControl()
 void form::findClosure(char choice, int index)
 {
 	bool isConsistent = true;
-	for (int i = 0; i < dependenciesNum; i++)
+	for (int i = 0; i < toOneDependenciesNum; i++)
 	{
 		if (choice == 's')
 		{
@@ -991,28 +1122,22 @@ void form::findClosure(char choice, int index)
 		isConsistent = true;
 		for (int j = 0; j < attributesNum; j++)
 		{
-			if (leftDependencies[i][j] == 1 && closure[j] != 1)
+			if (toOneLeftDependencies[i][j] == 1 && closure[j] != 1)
 			{
 				isConsistent = false;
 				break;
 			}
 
 		}
-		if (isConsistent == true)
+
+		if (isConsistent == true
+			&& closure[toOneRightDependencies[i]] != 1)
 		{
-			for (int j = 0; j < attributesNum; j++)
-			{
-				if (rightDependencies[i][j] == 1 && closure[j] != 1)
-				{
-					//不打印过程
-					/*cout << "add ";
-					printAttribute(j);
-					cout << endl;*/
-					closure[j] = 1;
-					findClosure(choice, index);
-				}
-			}
-		}
+
+			closure[toOneRightDependencies[i]] = 1;
+			findClosure(choice, index);
+
+		}		
 	}
 	return;
 }
@@ -1030,14 +1155,14 @@ void form::secondProcess()
 
 	// 能通过除该依赖以外剩下的依赖得到这个属性，则可删去
 
-	for (int i = 0; i < dependenciesNum; i++)
+	for (int i = 0; i < toOneDependenciesNum; i++)
 	{
 		if (basisDependencies[i] == 1)
 		{
 			for (int j = 0; j < attributesNum; j++)
 			{
 				//确保该属性尚未被本次处理过程处理
-				if (maskAttributes[i][j] != -1 && leftDependencies[i][j] == 1)
+				if (maskAttributes[i][j] != -1 && toOneLeftDependencies[i][j] == 1)
 				{
 
 					//closure 要被设定为除本依赖外的其他依赖

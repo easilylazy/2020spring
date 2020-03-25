@@ -57,17 +57,20 @@ void defaultSetting(form& sets)
 #pragma endregion
 
 	int attributesNum = 4;//A,B,C,D
-	int dependenciesNum = 6;
-	int leftDependencies[6][4] = {
-		{1,0,0,0},{1,0,0,0},    //A
+	int dependenciesNum = 12;
+	int leftDependencies[12][4] = {
+		{1,0,0,0},{1,0,0,0},{1,0,0,0},    //A
 		//{1,1,0},{1,1,0},    //AB
-		{0,1,0,0},{0,1,0,0},	//B
-		{0,0,1,1},{0,0,1,1}		//CD
+		{0,1,0,0},{0,1,0,0},{0,1,0,0},	//B
+		{0,0,1,0},{0,0,1,0}	,{0,0,1,0}	,	//C
+		{0,0,0,1},{0,0,0,1},{0,0,0,1}		//D
 	};
-	int rightDependencies[6][4] = {
-		{0,1,0,0},{0,0,1,0},    //A->B, A->C,		
-		{1,0,0,0},{0,0,1,0},	//B->A, B->C,
-		{1,0,0,0},{0,1,0,0}		//CD->A, CD->B
+	int rightDependencies[12][4] = {
+		{0,1,0,0},{0,0,1,0},{0,0,0,1},    //A->B, A->C,	A->D	
+		{1,0,0,0},{0,0,1,0},{0,0,0,1},	//B->A, B->C, B->D
+		{1,0,0,0},{0,1,0,0}	,{0,0,0,1},	//C->A, C->B,C->D
+		{1,0,0,0},{0,1,0,0}	,{0,0,1,0}	//D->A, D->B, D->C
+
 	};
 	sets.setNum(4);
 	for (int i = 0; i < dependenciesNum; i++)

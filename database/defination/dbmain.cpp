@@ -4,8 +4,17 @@
 
 string language = "CN";
 bool displayTips = true;
+bool hideProcess = true;
+bool overFlow = false;
 int main(void)
 {
+
+
+
+
+
+
+
 	//实例对象
 	form sets;
 	string info = "********************INFO********************\n"\
@@ -34,7 +43,7 @@ int main(void)
 		"********************************************\n";
 	string menuCN = "********************目录********************\n"\
 		"i.初始化\ta.添加函数依赖\ts.设定求取闭包的属性\nf.开始寻找闭包\t"\
-		"p.打印现有信息\tb.开始寻找最小依赖集\nd.几个默认例子\nl.更少的提示\tc.changeLanguage\tq.退出\n"\
+		"p.打印现有信息\tb.开始寻找最小依赖集\nd.几个默认例子\to.显示(隐藏)过程\nl.更少(多)的提示\tc.changeLanguage\tq.退出\n"\
 		"********************************************\n";
 	char choice;
 
@@ -75,18 +84,22 @@ int main(void)
 		case'b':
 			sets.initControlDependencies();
 			sets.findBasis();
-			sets.printMinimaBases();
-			sets.printFinalResult();
+			//sets.printMinimaBases();
+			sets.printFinalResult();	
 			break;
 		case'c':
 			language == "EN" ? language = "CN" : language = "EN";
-		case'd':
-			
+			break;
+		case'd':			
 			chooseDefault(sets);
 			sets.printInfo();
 			break;
 		case'l':
-			displayTips = false;
+			displayTips == false ? displayTips = true : displayTips  = false;
+			break;
+		case'o':
+			hideProcess== false ? hideProcess = true : hideProcess = false;
+			break;
 		default:
 			break;
 		}

@@ -3,11 +3,13 @@
 #include <string>
 #include<iostream>
 //属性个数限制
-#define MAXSIZE 10
+#define MAXSIZE 15
 //依赖个数限制
-#define MAXNUM 30
-//减少打印信息
-#define LESSINFO true 
+#define MAXNUM 50
+////减少打印信息
+//#define hideProcess false
+
+#define BASESMAXNUM 100
 
 
 using namespace std;
@@ -16,6 +18,10 @@ using namespace std;
 extern string language;
 //提示
 extern bool displayTips;
+//过程
+extern bool hideProcess;
+//溢出
+extern bool overFlow;
 void initArray(int* array,int length,int initValue = 0);
 void printArray(int* array, int length);
 void initArray2d(int* array, int M, int N, int initValue = 0);
@@ -36,7 +42,7 @@ public:
 #pragma region 构函
 	minimalBase()
 	{
-		isValid = true;
+		isValid = false;//change  origin true
 		dependenciesNum = 0;
 		finalDependenciesNum = 0;
 		attributesNum = 0;
@@ -139,15 +145,8 @@ public:
 						}
 					}
 				
-				}
-
-			
-			}
-		
-			
-
-
-			
+				}			
+			}		
 		}
 	}
 #pragma endregion
@@ -170,14 +169,23 @@ public:
 		}
 #pragma endregion
 
+		if (hideProcess == false)
+		{
+			//printDependencies();
+			dropTrivival();
+			cout << tip1 << endl;
+			printDependencies();
+			dropRepeated();
+			cout << tip2 << endl;
+			printDependencies();
+		}
+		else
+		{
+			dropTrivival();
+			dropRepeated();
+		}
 
-		printDependencies();
-		dropTrivival();
-		cout <<tip1 << endl;
-		printDependencies();
-		dropRepeated();
-		cout << tip2 << endl;
-		printDependencies();
+
 	}
 	void printDependencies();
 	void printAttributes(int* attributes, char choice);
@@ -199,20 +207,21 @@ private:
 	//最小依赖集个数
 	int minimalBasesNum;
 	//存储最小依赖集数据
-	minimalBase minimalBases[MAXSIZE];
+	minimalBase minimalBases[BASESMAXNUM];
+	minimalBase current;
+	minimalBase last;
+
+
 	//属性值总个数
 	int attributesNum;
-	//依赖函数总个数
-	int dependenciesNum; 
 	//右部全都转化为单值的依赖个数（暂未使用）
 	int toOneDependenciesNum;
 	//属性用数组储存（存在置为1）
 	int attributes[MAXSIZE];
 	//储存依赖某一项的左部X，对应右部Y,有X->Y
-	int leftDependencies[MAXNUM][MAXSIZE];
+	int toOneLeftDependencies[MAXNUM][MAXSIZE];
 	//储存依赖某一项的右部Y，对应左部,有X->Y
-	int rightDependencies[MAXNUM][MAXSIZE];	
-
+	int toOneRightDependencies[MAXNUM];
 
 	//右边转化为单值储存（暂未使用）
 	//总维度（左侧）表示第i组依赖关系，二维表示该组依赖关系中的第几个
@@ -256,6 +265,7 @@ public:
 	void initClosure();
 	//初始化序号为index的依赖（置0）
 	void initDependencies(int index);
+	void initMinimalBases();
 	//初始化最小依赖集（置1）
 	void initbasisDependencies();
 	//初始化控制依赖集（置1）
@@ -276,6 +286,7 @@ public:
 	void setDependencies(int*, int*, int state = -1);
 	//获取第index个函数依赖的右部（默认经过了分解，只有一个值）
 	int getRightDependency(int index);
+	bool isValidNew(char& ch);
 	//命令行获取输入，添加新的依赖（被addDependency()调用）
 	int addSide(char& choice, int* determine);
 	//命令行获取输入，添加新的依赖
@@ -289,7 +300,7 @@ public:
 
 #pragma region 寻找依赖集
 	//寻找某函数依赖集的basis/最小依赖集
-	void findBasis();
+	bool findBasis();
 	//将第index依赖的所有属性传入closure
 	//再便于之后计算属性在其他函数依赖下的闭包能否覆盖index的右部属性，若能，则可删去该函数依赖//
 	void sendToClosure(int index);
@@ -306,8 +317,10 @@ public:
 	//除了某删去第index依赖的第mask属性,将其他的属性传入closure
 	//再便于之后计算其他属性在其他函数依赖下的闭包能否覆盖删除属性，若能，则可删去该函数依赖下中左部的该属性
 	void sendToClosure(int index, int mask);
+	
 #pragma endregion
 
+	bool printFinalResult(minimalBase& current);
 	//只打印和前面不完全相同的依赖集
 	void printFinalResult();
 	//比较两个数组中，完全一样返回true，否则返回false
@@ -321,14 +334,17 @@ public:
 	void printInfo();
 	//打印最小函数依赖
 	void printBasis();
+	//将找到的最小函数依赖集保存至saveTo
+	void saveBasis(minimalBase& saveTo);
 	//将找到的最小函数依赖集保存至minimalBases中
-	void saveBasis();
+	bool saveBasis();
 	//打印第index个属性名称
 	void printAttribute(int index);
 	//打印某个数组attributes中为1的值对应的字母名称
 	void printAttributes(int* attributes, char choice = 'w');
 
 	void printMinimaBases();
+	void printMinimaBases(minimalBase base);
 #pragma endregion
 
 	
