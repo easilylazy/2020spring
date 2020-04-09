@@ -4,7 +4,6 @@
 DECLARE @databaseName varchar(20);
 DECLARE @createSql varchar(40);
 set @databaseName = 'medicalSystem'
-
 if exists (SELECT * FROM sys.databases 
 			WHERE name = @databaseName)
 			print 'database '+@databaseName+' already exists';

@@ -51,8 +51,13 @@ INSERT INTO Hospital( 医院名称,医院等级,医院类型,省,市,县,床位数, 医院地址) VALU
 ('承德医学院附属医院','三级甲等','综合医院','河北省','承德市','双桥区',2400,'承德市南营子大街36号')
 GO
 
+--select id,name,age,salary,row_number()over(order by salary desc) rn
 
+--USE medicalSystem
+--select 医院名称,row_number()over(order by 医院名称 desc) 
+--from Hospital
 SELECT * FROM Hospital
+WHERE 医院名称='沧州市人民医院'
 SELECT * FROM department
 
 
@@ -61,7 +66,7 @@ SELECT * FROM department
 
 
 
-
+/*
 
 INSERT INTO Hospital VALUES
 	('河北大学附属医院','三级甲等','综合医院','河北省','保定市','莲池区',2300,'保定市莲池区裕华东路212号'),
@@ -90,3 +95,4 @@ SELECT*FROM Hospital
 GO
 
 
+*/
