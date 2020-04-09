@@ -11,20 +11,17 @@ Date: 2020-04-09
 USE medicalSystem
 GO
 
-IF NOT EXISTS (SELECT * FROM SYSOBJECTS WHERE name = 'trigger_defaultDepartment')
+IF EXISTS (SELECT * FROM SYSOBJECTS WHERE name = 'trigger_defaultDepartment')
 BEGIN
+DROP TRIGGER trigger_defaultDepartment
+END
+GO
 
 CREATE TRIGGER  trigger_defaultDepartment ON Hospital
 AFTER INSERT 
 AS 
 BEGIN
-
 	INSERT INTO Department 
 	 SELECT D.number,D.name,I.Ò½ÔºÃû³Æ FROM defaultDepartment D, inserted I
-
-
-
-
 END
 
-END
