@@ -23,8 +23,8 @@ SQL SERVER
 - 最后可打开以下文件进行测试： test.sql
 
 ## 更新
-附上修改后的 [RGPerson-master](https://github.com/gh0stkey/RGPerson](https://github.com/gh0stkey/RGPerson)
- 代码，python运行，可生成随机身份数据的SQL语句。
-https://github.com/easilylazy/2020spring/tree/master/database/medicalSystem/RGPerson-master 
+附上修改后的 [RGPerson-master](https://github.com/gh0stkey/RGPerson)
+ python代码，可生成随机身份数据的SQL语句。    
+[这里是修改后的](https://github.com/easilylazy/2020spring/tree/master/database/medicalSystem/RGPerson-master)
 
 
