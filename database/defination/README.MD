@@ -6,4 +6,5 @@
 
 
 可以在此处下载可执行文件：    
-[https://github.com/easilylazy/2020spring/releases]
+[defination.exe](https://github.com/easilylazy/2020spring/blob/master/database/defination/defination.exe)
+
