@@ -8,28 +8,29 @@ Date: 2020-04-09
 -- ----------------------------
 -- procedure to find the corresponding zipcode of a hospital
 -- ----------------------------
+
+PRINT 'START CREATE PROC  proc_findZipCode'
+
 USE medicalSystem
 GO
 
-if exists (SELECT * FROM sysobjects WHERE name = 'findZipCode')
+if exists (SELECT * FROM sysobjects WHERE name = 'proc_findZipCode')
 BEGIN
-DROP PROC findZipCode
+PRINT 'DROP PROC proc_findZipCode'
+DROP PROC proc_findZipCode
 END
 GO
 
-CREATE PROC findZipCode
+
+PRINT 'CREATE PROC proc_findZipCode'
+GO
+
+CREATE PROC proc_findZipCode
 AS
 BEGIN
 	UPDATE Hospital
-	SET ” ±‡= zip_code
+	SET code= zip_code
 	FROM Hospital left join hy_area
-		on  –=name
+		on city=name
 END
 GO
-update  hospital
-set ” ±‡=null
-GO
-SELECT * FROM Hospital
-EXECUTE findZipCode;
-GO
-SELECT * FROM Hospital

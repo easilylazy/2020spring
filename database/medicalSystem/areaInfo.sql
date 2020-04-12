@@ -1,66 +1,23 @@
 /*
 Target Server Type    : SQL SERVER
-Filename  :table_create.sql
+Filename  :areaInfo.sql
 Author: kbdxbt:https://github.com/kbdxbt/area_sql
 Date: 2020-04-09 
 */
 
 -- ----------------------------
--- Table structure for hy_area
+-- information of area
 -- ----------------------------
 
-/*
-Navicat MySQL Data Transfer
 
-Source Server         : 本地数据库
-Source Server Version : 50553
-Source Host           : localhost:3306
-Source Database       : thinkcmf
-
-Target Server Type    : MYSQL
-Target Server Version : 50553
-File Encoding         : 65001
-
-Date: 2017-09-26 15:20:01
-*/
-
---SET FOREIGN_KEY_CHECKS = 0;
-
--- ----------------------------
--- Table structure for hy_area
--- ----------------------------
-
-USE medicalSystem
-
-DROP TABLE IF EXISTS "hy_area";
-GO
-
-CREATE TABLE "hy_area" (
-  "id" int NOT NULL ,-- COMMENT 'ID',--AUTO_INCREMENT
-  "pid" int DEFAULT NULL ,--COMMENT '父id',
-  "shortname" varchar(100) DEFAULT NULL ,--COMMENT '简称',
-  "name" varchar(100) DEFAULT NULL ,--COMMENT '名称',
-  "merger_name" varchar(255) DEFAULT NULL ,--COMMENT '全称',
-  "level" tinyint DEFAULT NULL ,--COMMENT '层级 0 1 2 省市区县',
-  "pinyin" varchar(100) DEFAULT NULL ,--COMMENT '拼音',
-  "code" varchar(100) DEFAULT NULL ,--COMMENT '长途区号',
-  "zip_code" varchar(100) DEFAULT NULL ,--COMMENT '邮编',
-  "first" varchar(50) DEFAULT NULL ,--COMMENT '首字母',
-  "lng" varchar(100) DEFAULT NULL ,--COMMENT '经度',
-  "lat" varchar(100) DEFAULT NULL ,--COMMENT '纬度',
-  PRIMARY KEY ("id")
-) --ENGINE=InnoDB AUTO_INCREMENT=3750 DEFAULT CHARSET=utf8;
-
--- ----------------------------
--- Records of hy_area
--- ----------------------------
-
-GO
+PRINT 'INSERT INTO hy_area VALUES'
+--USE medicalSystem
+--GO
 
 --SET IDENTITY_INSERT hy_area ON
 
-SELECT TOP(100)* FROM hy_area
-
+--SELECT TOP(100)* FROM hy_area
+DELETE FROM "hy_area"
 
 INSERT INTO "hy_area" VALUES ('1', '0', '北京', '北京', '中国,北京', '1', 'beijing', '', '', 'B', '116.405285', '39.904989');
 INSERT INTO "hy_area" VALUES ('2', '1', '北京', '北京市', '中国,北京,北京市', '2', 'beijing', '010', '100000', 'B', '116.405285', '39.904989');

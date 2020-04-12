@@ -1,40 +1,23 @@
+/*
+Target Server Type    : SQL SERVER
+Filename  :hospitalInfo.sql
+Author: Lee Zeeyee
+Date: 2020-04-11
+*/
+
+-- ----------------------------
+-- information of hospitals
+-- ----------------------------
+PRINT '导入医院数据'
 USE medicalSystem
 GO
 
-DROP TABLE Hospital
-go
-
-if exists (select * from sysobjects where name = 'fk_Hospital')
-
-ALTER TABLE Hospital
-DROP CONSTRAINT fk_Hospital
 
 
-if exists (select * from sysobjects where name = 'Hospital')
-BEGIN
-	PRINT 'ALREADY EXISTS Hospital'
-	DROP TABLE Hospital
-END
-else
-BEGIN
-CREATE TABLE [dbo].[Hospital](
- 医院名称 nvarchar(40) NOT NULL UNIQUE,
- 医院等级 nvarchar(4) NULL,
-医院类型 nvarchar(4) NULL,
-省 nvarchar(10) NULL,
-市 nvarchar(10) NULL,
-县 nvarchar(20) NULL,
-床位数 int NULL,
-医院地址 nvarchar(60) NULL,
-邮编 varchar(100) NULL,
-constraint pk_Hospital PRIMARY KEY
-			NONCLUSTERED(医院名称),
---CONSTRAINT fk_Hospital FOREIGN KEY(邮编)
-		--REFERENCES hy_area(zip_code)
-)
-END
+--if exists (select * from sysobjects where name = 'fk_Hospital')
 
-
+--ALTER TABLE Hospital
+--DROP CONSTRAINT fk_Hospital
 
 --CREATE TRIGGER tr_addCode ON Hospital
 --before
@@ -43,7 +26,7 @@ END
 DELETE FROM Hospital
 GO
 
-INSERT INTO Hospital( 医院名称,医院等级,医院类型,省,市,县,床位数, 医院地址) VALUES
+INSERT INTO Hospital( hospitalName,hospitalRank,hospitalType,province,city,county,bedNum, hospitalAddress) VALUES
 ('河北大学附属医院','三级甲等','综合医院','河北省','保定市','莲池区',2300,'保定市莲池区裕华东路212号'),
 ('保定市第一中心医院','三级甲等','综合医院','河北省','保定市','莲池区',2100,'保定市莲池区长城北大街320号'),
 ('沧州市人民医院','三级甲等','综合医院','河北省','沧州市','新华区',3000,'沧州市清池大道7号'),
@@ -54,11 +37,11 @@ GO
 --select id,name,age,salary,row_number()over(order by salary desc) rn
 
 --USE medicalSystem
---select 医院名称,row_number()over(order by 医院名称 desc) 
+--select hospitalName,row_number()over(order by hospitalName desc) 
 --from Hospital
-SELECT * FROM Hospital
-WHERE 医院名称='沧州市人民医院'
-SELECT * FROM department
+--SELECT * FROM Hospital
+--WHERE hospitalName='沧州市人民医院'
+--SELECT * FROM department
 
 
 
