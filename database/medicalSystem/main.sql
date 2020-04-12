@@ -8,26 +8,17 @@ Date: 2020-04-11
 -- ----------------------------
 -- This is the main caller for each script
 -- ----------------------------
-
 SET NOCOUNT ON
 GO
-
-
-
 :On Error exit
-
 PRINT '/**************CREATE DATABASE****************/'
 :r C:\Users\cascara\Desktop\"Learning Materials"\"2020spring"\"2020spring"\database\medicalSystem\database_create.sql
-
 PRINT '/**************CREATE TABLE****************/'
 :r C:\Users\cascara\Desktop\"Learning Materials"\"2020spring"\"2020spring"\database\medicalSystem\table_create.sql
-
 PRINT '/**************CREATE TABLE****************/'
-
 :r C:\Users\cascara\Desktop\"Learning Materials"\"2020spring"\"2020spring"\database\medicalSystem\proc_findZipCode.sql
 :r C:\Users\cascara\Desktop\"Learning Materials"\"2020spring"\"2020spring"\database\medicalSystem\proc_patient.sql
 :r C:\Users\cascara\Desktop\"Learning Materials"\"2020spring"\"2020spring"\database\medicalSystem\trigger_defaultDepartment.sql
-
 PRINT '/**************CREATE OVER****************/'
 GO
 
@@ -39,14 +30,14 @@ GO
 
 
 --分别打开以下文件执行进行初始数据的插入
--- C:\Users\cascara\Desktop\"Learning Materials"\"2020spring"\"2020spring"\database\medicalSystem\areaInfo.sql
--- C:\Users\cascara\Desktop\"Learning Materials"\"2020spring"\"2020spring"\database\medicalSystem\hospitalInfo.sql
--- C:\Users\cascara\Desktop\"Learning Materials"\"2020spring"\"2020spring"\database\medicalSystem\residentInfo.sql
--- C:\Users\cascara\Desktop\"Learning Materials"\"2020spring"\"2020spring"\database\medicalSystem\doctorInfo.sql
+-- medicalSystem\areaInfo.sql
+-- medicalSystem\hospitalInfo.sql
+-- medicalSystem\residentInfo.sql
+-- medicalSystem\doctorInfo.sql
 
 
 --打开以下文件进行TEST 
--- C:\Users\cascara\Desktop\"Learning Materials"\"2020spring"\"2020spring"\database\medicalSystem\test.sql
+-- medicalSystem\test.sql
 
 
 /*如果出现无法删除数据库的情况，请取消注释，执行下列语句*/
