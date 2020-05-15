@@ -22,3 +22,14 @@
 1. [数据库课设项目(上) 医院](https://blog.csdn.net/cascara/article/details/105404930)       
 2. [数据库课设项目(下)  医护人员与患者](https://blog.csdn.net/cascara/article/details/105418042)
 3. [数据库课设项目（续）批处理](https://blog.csdn.net/cascara/article/details/105472431)   
+ 
+### [maskQuestion](https://github.com/easilylazy/2020spring/tree/master/database/maskQuestion)    
+期末大作业的出题部分     
+关于疫情期间口罩生产线的ODL，ER图的设计以及与关系模式的转化 
+
+### [medicalAnswer](https://github.com/easilylazy/2020spring/tree/master/database/medicalAnswer)    
+期末大作业的答题部分     
+关于疫情期间就医的ODL，ER图的设计以及与关系模式的转化 
+
+### [exam](https://github.com/easilylazy/2020spring/tree/master/database/exam)    
+线上期末考试试题及本人解答
