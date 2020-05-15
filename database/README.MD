@@ -32,4 +32,5 @@
 关于疫情期间就医的ODL，ER图的设计以及与关系模式的转化 
 
 ### [exam](https://github.com/easilylazy/2020spring/tree/master/database/exam)    
+总结文章：[数据库备考总结](http://leezeeyee.com/database-exam)       
 线上期末考试试题及本人解答
